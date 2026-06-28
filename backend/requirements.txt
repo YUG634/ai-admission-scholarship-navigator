@@ -1,0 +1,26 @@
+# Core Framework - Updated versions
+fastapi>=0.115.0
+uvicorn[standard]>=0.24.0
+python-multipart>=0.0.6
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# AI & ML
+google-genai>=1.44.0
+google-adk>=0.1.0
+
+# Document Processing
+pypdf2>=3.0.1
+pypdf>=3.17.1
+pdfplumber>=0.10.3
+
+# Utilities
+python-dotenv>=1.0.0
+aiofiles>=23.2.1
+httpx>=0.26.0
+cors>=1.0.1
+
+# Development
+pytest>=7.4.3
+black>=23.11.0
+flake8>=6.1.0

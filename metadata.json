@@ -1,0 +1,6 @@
+{
+  "name": "AI Admission & Scholarship Navigator",
+  "description": "An AI-powered system that helps students demystify complex admission notifications and scholarship PDFs, analyze eligibility, and generate personalized action plans.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
