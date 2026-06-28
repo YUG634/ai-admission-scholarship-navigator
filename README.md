@@ -45,7 +45,7 @@
 
 ## 🚀 Overview
 
-**AI Admission & Scholarship Navigator** is a production-grade, multi-agent AI system that transforms lengthy, confusing admission notifications and scholarship PDFs into personalized, actionable plans.
+**AI Admission & Scholarship Navigator** is a production-grade, multi-agent AI system that transforms lengthy, confusing admission notifications and scholarship PDFs into personalized, actionable insights.
 
 ### 🎯 The Problem
 
@@ -104,64 +104,65 @@ Our system uses **3 specialized AI agents** powered by Google ADK and Gemini 2.5
 ---
 
 ## 🏗️ Architecture
-┌─────────────────────────────────────────────────────────────────┐
-│ User Browser │
-│ (Netlify Deployment) │
-└─────────────────────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ React Frontend (Vite) │
-│ - Tailwind CSS for styling │
-│ - Framer Motion for animations │
-│ - Lucide React for icons │
-└─────────────────────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ FastAPI Backend (Render) │
-│ - RESTful API endpoints │
-│ - CORS configuration │
-│ - PDF processing with PyPDF2 │
-│ - Error handling & logging │
-└─────────────────────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ Google ADK Multi-Agent System │
-│ │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ Agent 1: Document Analysis Agent │ │
-│ │ - Extracts scholarship/admission details │ │
-│ │ - Classifies document type (scholarship/admission) │ │
-│ │ - Separates mandatory vs optional criteria │ │
-│ │ - Identifies alternative admission paths │ │
-│ └─────────────────────────────────────────────────────────┘ │
-│ ▼ │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ Agent 2: Eligibility Agent │ │
-│ │ - Compares profile against requirements │ │
-│ │ - Never penalizes for optional categories │ │
-│ │ - Provides detailed reasoning │ │
-│ │ - Calculates eligibility score │ │
-│ └─────────────────────────────────────────────────────────┘ │
-│ ▼ │
-│ ┌─────────────────────────────────────────────────────────┐ │
-│ │ Agent 3: Action Plan Agent │ │
-│ │ - Creates personalized checklists │ │
-│ │ - Identifies missing documents │ │
-│ │ - Generates timeline & next steps │ │
-│ │ - Provides strategic recommendations │ │
-│ └─────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ Google Gemini 2.5 Flash │
-│ (AI Model for all agents) │
-└─────────────────────────────────────────────────────────────────┘
 
-text
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ User Browser                                                    │
+│ (Netlify Deployment)                                            │
+└─────────────────────────────────────────────────────────────────┘
+│
+▼
+┌─────────────────────────────────────────────────────────────────┐
+│ React Frontend (Vite)                                           │
+│ - Tailwind CSS for styling                                      │
+│ - Framer Motion for animations                                  │
+│ - Lucide React for icons                                        │
+└─────────────────────────────────────────────────────────────────┘
+│
+▼
+┌─────────────────────────────────────────────────────────────────┐
+│ FastAPI Backend (Render)                                        │
+│ - RESTful API endpoints                                          │
+│ - CORS configuration                                            │
+│ - PDF processing with PyPDF2                                    │
+│ - Error handling & logging                                      │
+└─────────────────────────────────────────────────────────────────┘
+│
+▼
+┌─────────────────────────────────────────────────────────────────┐
+│ Google ADK Multi-Agent System                                   │
+│ │
+│ ┌──────────────────────────────────────────────────────────┐   │
+│ │ Agent 1: Document Analysis Agent                         │   │
+│ │ - Extracts scholarship/admission details                 │   │
+│ │ - Classifies document type (scholarship/admission)       │   │
+│ │ - Separates mandatory vs optional criteria               │   │
+│ │ - Identifies alternative admission paths                 │   │
+│ └──────────────────────────────────────────────────────────┘   │
+│ ▼                                                               │
+│ ┌──────────────────────────────────────────────────────────┐   │
+│ │ Agent 2: Eligibility Agent                               │   │
+│ │ - Compares profile against requirements                  │   │
+│ │ - Never penalizes for optional categories                │   │
+│ │ - Provides detailed reasoning                            │   │
+│ │ - Calculates eligibility score                           │   │
+│ └──────────────────────────────────────────────────────────┘   │
+│ ▼                                                               │
+│ ┌──────────────────────────────────────────────────────────┐   │
+│ │ Agent 3: Action Plan Agent                               │   │
+│ │ - Creates personalized checklists                        │   │
+│ │ - Identifies missing documents                           │   │
+│ │ - Generates timeline & next steps                        │   │
+│ │ - Provides strategic recommendations                     │   │
+│ └──────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────┘
+│
+▼
+┌─────────────────────────────────────────────────────────────────┐
+│ Google Gemini 2.5 Flash                                         │
+│ (AI Model for all agents)                                       │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -259,8 +260,11 @@ cp .env.example .env
 
 # Run the server
 python run.py
-Frontend Setup
-bash
+```
+
+### Frontend Setup
+
+```bash
 # Navigate to frontend
 cd frontend
 
@@ -269,21 +273,29 @@ npm install
 
 # Run development server
 npm run dev
-Access the Application
-Frontend: http://localhost:5173
+```
 
-Backend API: http://localhost:8000
+### Access the Application
 
-API Documentation: http://localhost:8000/docs
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs
 
-📊 API Documentation
-Endpoints
-Method	Endpoint	Description
-GET	/	Root endpoint with service info
-GET	/health	Health check with component status
-POST	/api/v1/analyze	Analyze PDF with student profile
-Example Request
-bash
+---
+
+## 📊 API Documentation
+
+### Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/` | Root endpoint with service info |
+| GET | `/health` | Health check with component status |
+| POST | `/api/v1/analyze` | Analyze PDF with student profile |
+
+### Example Request
+
+```bash
 curl -X POST "http://localhost:8000/api/v1/analyze" \
   -F "pdf_file=@scholarship.pdf" \
   -F "full_name=John Doe" \
@@ -292,8 +304,11 @@ curl -X POST "http://localhost:8000/api/v1/analyze" \
   -F "family_income=500000" \
   -F "current_qualification=B.Sc" \
   -F "marks_percentage=85"
-Example Response
-json
+```
+
+### Example Response
+
+```json
 {
   "analysis": {
     "document_type": "admission",
@@ -325,48 +340,44 @@ json
       "Register for entrance exam",
       "Gather required documents"
     ],
-    "checklist": [...],
-    "missing_documents": [...],
-    "timeline": {...}
+    "checklist": [],
+    "missing_documents": [],
+    "timeline": {}
   }
 }
-🚢 Deployment
-Deploy Backend to Render
-Create account at Render
+```
 
-Click "New +" → "Web Service"
+---
 
-Connect your GitHub repository
+## 🚢 Deployment
 
-Use these settings:
+### Deploy Backend to Render
 
-Build Command: pip install -r requirements.txt
+1. Create account at [Render](https://render.com)
+2. Click "New +" → "Web Service"
+3. Connect your GitHub repository
+4. Use these settings:
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Environment Variables**: Add `GEMINI_API_KEY` and `ALLOWED_ORIGINS`
+5. Click "Create Web Service"
 
-Start Command: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+### Deploy Frontend to Netlify
 
-Environment Variables: Add GEMINI_API_KEY and ALLOWED_ORIGINS
+1. Create account at [Netlify](https://netlify.com)
+2. Click "Add new site" → "Import an existing project"
+3. Connect your GitHub repository
+4. Build settings (auto-detected):
+   - **Build Command**: `npm run build`
+   - **Publish Directory**: `dist`
+   - **Environment Variables**: Add `VITE_API_BASE_URL`
+5. Click "Deploy site"
 
-Click "Create Web Service"
+---
 
-Deploy Frontend to Netlify
-Create account at Netlify
+## 📁 Project Structure
 
-Click "Add new site" → "Import an existing project"
-
-Connect your GitHub repository
-
-Build settings (auto-detected):
-
-Build Command: npm run build
-
-Publish Directory: dist
-
-Environment Variables: Add VITE_API_BASE_URL
-
-Click "Deploy site"
-
-📁 Project Structure
-text
+```
 ai-admission-scholarship-navigator/
 ├── backend/
 │   ├── app/
@@ -431,46 +442,55 @@ ai-admission-scholarship-navigator/
 ├── .gitignore
 ├── LICENSE
 └── README.md
-🤝 Contributing
+```
+
+---
+
+## 🤝 Contributing
+
 We welcome contributions! Please follow these steps:
 
-Fork the repository
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-Create a feature branch (git checkout -b feature/AmazingFeature)
+### Development Guidelines
 
-Commit your changes (git commit -m 'Add some AmazingFeature')
+- Follow PEP 8 for Python code
+- Use ESLint and Prettier for frontend code
+- Write tests for new features
+- Update documentation for API changes
+- Keep code modular and well-commented
 
-Push to the branch (git push origin feature/AmazingFeature)
+---
 
-Open a Pull Request
+## 📝 License
 
-Development Guidelines
-Follow PEP 8 for Python code
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-Use ESLint and Prettier for frontend code
+---
 
-Write tests for new features
+## 🙏 Acknowledgments
 
-Update documentation for API changes
+- **Google ADK** - For providing the agent framework
+- **Google Gemini** - For the powerful AI capabilities
+- **FastAPI** - For the excellent web framework
+- **React** - For the beautiful frontend library
+- **Tailwind CSS** - For the amazing styling framework
+- **Google Cloud & Gen AI Academy** - For the "Meet the Builders" initiative
 
-Keep code modular and well-commented
+---
 
-📝 License
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 👨‍💻 Made By
 
-🙏 Acknowledgments
-Google ADK - For providing the agent framework
-
-Google Gemini - For the powerful AI capabilities
-
-FastAPI - For the excellent web framework
-
-React - For the beautiful frontend library
-
-Tailwind CSS - For the amazing styling framework
-
-Google Cloud & Gen AI Academy - For the "Meet the Builders" initiative
-
-👨‍💻 Made By
-<div align="center"> <h3> <a href="https://github.com/YUG634"> <img src="https://img.shields.io/badge/GitHub-YUG634-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/> </a> <a href="https://linkedin.com/in/yug-agrawal"> <img src="https://img.shields.io/badge/LinkedIn-Yug%20Agrawal-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/> </a> <a href="mailto:yugagrawal634@gmail.com"> <img src="https://img.shields.io/badge/Email-yugagrawal634%40gmail.com-EA4335?style=for-the-badge&logo=gmail&logoColor=white" alt="Email"/> </a> </h3> <p><strong>Yug Agrawal</strong></p> <p>🚀 Building AI-powered solutions for real-world problems</p> <p> <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python"/> <img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React"/> <img src="https://img.shields.io/badge/Google_Cloud-4285F4?style=flat-square&logo=google-cloud&logoColor=white" alt="Google Cloud"/> <img src="https://img.shields.io/badge/Gemini-4285F4?style=flat-square&logo=google&logoColor=white" alt="Gemini"/> </p> </div>
-<div align="center"> <p>Built with ❤️ for the Google Cloud & Gen AI Academy "Meet the Builders" initiative</p> <p> <img src="https://img.shields.io/badge/Google_Cloud-4285F4?style=for-the-badge&logo=google-cloud&logoColor=white" alt="Google Cloud"/> <img src="https://img.shields.io/badge/Gen_AI_Academy-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gen AI Academy"/> </p> </div> ```
+<div align="center">
+  <h3>
+    <a href="https://github.com/YUG634">
+      <img src="https://img.shields.io/badge/GitHub-YUG634-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
+    </a>
+  </h3>
+  <p>Built with ❤️ for the Google Cloud & Gen AI Academy "Meet the Builders" initiative</p>
+  <img src="https://img.shields.io/badge/Google_Cloud-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Google Cloud"/>
+</div>
