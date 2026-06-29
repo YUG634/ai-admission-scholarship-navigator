@@ -14,8 +14,8 @@ class GeminiService:
             raise ValueError("GEMINI_API_KEY not found in environment variables")
 
         self.client = genai.Client(api_key=self.api_key)
-        # ✅ CHANGE: Use gemini-2.0-flash (higher quota)
-        self.model_name = "gemini-2.0-flash"
+        # ✅ CHANGE: Use gemini-2.5-flash (higher quota)
+        self.model_name = "gemini-2.5-flash"
         self.temperature = float(os.getenv("AGENT_TEMPERATURE", 0.3))
         self.max_tokens = int(os.getenv("AGENT_MAX_TOKENS", 2048))
 

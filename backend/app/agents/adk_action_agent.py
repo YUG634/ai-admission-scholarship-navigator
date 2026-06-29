@@ -56,7 +56,7 @@ class ADKActionAgent:
         
         return Agent(
             name="ActionPlanAgent",
-            model="gemini-2.0-flash",  # ✅ Changed
+            model="gemini-2.5-flash",  # ✅ Changed
             instruction="Create personalized action plans with deadlines.",
             tools=[FunctionTool(generate_action_plan)]
         )

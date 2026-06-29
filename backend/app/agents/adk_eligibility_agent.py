@@ -45,7 +45,7 @@ class ADKEligibilityAgent:
         
         return Agent(
             name="EligibilityAgent",
-            model="gemini-2.0-flash",  # ✅ Changed
+            model="gemini-2.5-flash",  # ✅ Changed
             instruction="Check eligibility and identify missing documents.",
             tools=[FunctionTool(check_eligibility)]
         )
