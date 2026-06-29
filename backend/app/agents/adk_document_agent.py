@@ -12,57 +12,55 @@ class ADKDocumentAgent:
     def _create_agent(self):
         def extract_scholarship_info(text: str) -> dict:
             prompt = f"""
-            You are an expert document analyst. Analyze this document.
+            You are an expert document analyst. Analyze this document and extract structured information.
 
             Document text:
-            {text[:8000]}
+            {text[:10000]}
 
-            Return ONLY valid JSON with these fields:
+            CRITICAL: Classify EVERY piece of information into the correct category:
+
+            1. **mandatory_requirements**: Requirements that ALL applicants MUST meet.
+               - Examples: "Must have passed 12th standard", "Must be an Indian citizen", "Must have appeared for entrance exam"
+               - These are NOT optional - every applicant needs these
+
+            2. **special_categories**: OPTIONAL categories that provide benefits or special consideration.
+               - Examples: "Sindhi Minority students", "In-house students", "SC/ST/OBC/EWS categories"
+               - These are benefits, NOT requirements
+
+            3. **alternative_admission_paths**: Different ways to qualify for admission.
+               - Examples: "MHCET scores", "H-CET exam", "National level entrance exams", "Direct admission"
+
+            4. **required_documents**: Documents needed for application.
+               - Examples: "10th Marksheet", "12th Marksheet", "Aadhaar Card", "Caste Certificate"
+               - Extract each document separately
+
+            5. **important_instructions**: Key application instructions.
+               - Examples: "Apply online by deadline", "Document verification required"
+
+            Return ONLY valid JSON:
             {{
-                "document_type": "admission",
-                "scholarship_name": "First-Year Undergraduate Degree Programme 2025-2026 Admissions",
-                "deadline": "Thursday, 05-June-2025, 6.00 pm",
+                "document_type": "scholarship" or "admission" or "unknown",
+                "scholarship_name": "Full name of the program/scholarship",
+                "deadline": "Application deadline",
                 "mandatory_requirements": [
-                    "Apply for First-Year Undergraduate Degree Programme",
-                    "Fill the online admission form by deadline",
-                    "Appear for Qualifying Entrance Exam",
-                    "Online verification of documents",
-                    "Payment of fees"
+                    "Requirement 1",
+                    "Requirement 2"
                 ],
                 "special_categories": [
-                    "Sindhi Minority students",
-                    "In-house students of HR and KC Colleges"
+                    "Category 1",
+                    "Category 2"
                 ],
                 "alternative_admission_paths": [
-                    "M-HCET scores",
-                    "H-CET entrance exam",
-                    "H-LAT entrance exam",
-                    "Direct Admission for Sindhi Minority",
-                    "Direct Admission for In-house students",
-                    "Direct Admission for specific programs"
+                    "Path 1",
+                    "Path 2"
                 ],
                 "required_documents": [
-                    "10th Marksheet",
-                    "12th Marksheet",
-                    "12th Leaving Certificate",
-                    "Aadhaar Card Copy",
-                    "Transfer Certificate",
-                    "Migration Certificate",
-                    "APAAR ID",
-                    "Caste/Sindhi Certificate",
-                    "Disability Certificate",
-                    "Entrance exam certificate",
-                    "Gap Certificate",
-                    "Cultural/Sports Certificate",
-                    "Any other Certificate",
-                    "Anti-Ragging Undertaking form of UGC"
+                    "Document 1",
+                    "Document 2"
                 ],
                 "important_instructions": [
-                    "Apply online at https://hsncu.admissiondesk.org/",
-                    "Phase 1: May 5 - May 24, 2025",
-                    "Phase 2: May 27 - June 5, 2025",
-                    "H-CET/H-LAT at http://hsncu.epravesh.com/",
-                    "Merit lists start May 26, 2025"
+                    "Instruction 1",
+                    "Instruction 2"
                 ]
             }}
             """
@@ -71,6 +69,7 @@ class ADKDocumentAgent:
         return Agent(
             name="DocumentAnalysisAgent",
             model="gemini-2.5-flash",
-            instruction="Extract structured information from documents.",
+            instruction="""Extract structured information and classify it into mandatory_requirements, special_categories, alternative_admission_paths, required_documents, and important_instructions.
+            NEVER mix these categories. special_categories are OPTIONAL, not mandatory.""",
             tools=[FunctionTool(extract_scholarship_info)]
         )

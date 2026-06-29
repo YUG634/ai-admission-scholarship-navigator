@@ -11,41 +11,47 @@ export interface StudentProfile {
 export interface ScholarshipAnalysis {
   scholarship_name: string;
   deadline: string;
-  eligibility_criteria: string[];
+  // ✅ New fields that match backend
+  mandatory_requirements: string[];
+  special_categories: string[];
+  alternative_admission_paths: string[];
   required_documents: string[];
-  instructions: string;
-  // Additional fields from new schema
+  important_instructions: string[];
+  // Legacy support (will be removed)
+  eligibility_criteria?: string[];
+  instructions?: string;
   document_type?: string;
-  special_categories?: string[];
-  alternative_admission_paths?: string[];
-  mandatory_requirements?: string[];
-  important_instructions?: string[];
 }
 
 export interface EligibilityEvaluation {
-  status: "Eligible" | "Not Eligible" | "Partially Eligible" | string;
+  status: "Eligible" | "Partially Eligible" | "Not Eligible" | string;
   reasons: string[];
   score?: number;
   matching_criteria?: string[];
   missing_criteria?: string[];
-  mandatory_met?: boolean;
-  special_category_eligible?: boolean;
-  has_alternative_path?: boolean;
+  // ✅ New fields that match backend
+  missing_documents: string[];
+  mandatory_met: boolean;
+  special_category_eligible: boolean;
+  has_alternative_path: boolean;
 }
 
 export interface ChecklistItem {
   task: string;
   priority: "High" | "Medium" | "Low" | string;
-  timeframe: string;
+  // ✅ Standardized on 'deadline'
+  deadline: string;
+  // Legacy support
+  timeframe?: string;
 }
 
 export interface ActionPlan {
+  immediate_actions: string[];
   checklist: ChecklistItem[];
   missing_documents: string[];
   recommendations: string[];
-  immediate_actions?: string[];
-  next_steps?: string[];
-  timeline?: Record<string, string>;
+  next_steps: string[];
+  timeline: Record<string, string>;
 }
 
 export interface AgentPipelineResponse {

@@ -21,34 +21,35 @@ class ADKEligibilityAgent:
             {analysis_json}
 
             CRITICAL RULES:
-            1. NEVER treat special_categories as mandatory requirements
-            2. If student meets all mandatory_requirements, they are ELIGIBLE
-            3. If student meets mandatory_requirements but some information is missing, use PARTIALLY ELIGIBLE
-            4. Only reject as NOT ELIGIBLE if mandatory_requirements are clearly not met
+            1. **NEVER treat special_categories as mandatory requirements**
+            2. **Only mandatory_requirements should cause rejection**
+            3. **If mandatory requirements are met but information is missing → Partially Eligible**
+            4. **Only use Not Eligible when mandatory requirements are clearly violated**
+
+            For missing_documents:
+            - Look at required_documents and compare with student profile
+            - Only include documents that are actually required
+            - For General category students, DO NOT include Caste Certificate
 
             Return ONLY valid JSON:
             {{
-                "status": "Partially Eligible",
-                "score": 25,
+                "status": "Eligible" or "Partially Eligible" or "Not Eligible",
+                "score": 0-100,
                 "reasons": [
-                    "Student meets academic requirements",
-                    "Entrance exam information missing"
+                    "Clear explanation of eligibility status"
                 ],
                 "matching_criteria": [
-                    "Class 12 pass requirement met"
+                    "Mandatory requirements the student meets"
                 ],
                 "missing_criteria": [
-                    "Entrance exam information not provided"
+                    "Requirements not met or information missing"
                 ],
                 "missing_documents": [
-                    "10th Marksheet",
-                    "12th Marksheet",
-                    "Aadhaar Card Copy",
-                    "Entrance exam certificate"
+                    "Documents the student needs to gather"
                 ],
-                "mandatory_met": true,
-                "special_category_eligible": false,
-                "has_alternative_path": true
+                "mandatory_met": true/false,
+                "special_category_eligible": true/false,
+                "has_alternative_path": true/false
             }}
             """
             return self.gemini.generate_structured_response(prompt)
@@ -56,9 +57,8 @@ class ADKEligibilityAgent:
         return Agent(
             name="EligibilityAgent",
             model="gemini-2.5-flash",
-            instruction="""Compare student profiles against requirements.
-            ALWAYS include missing_documents field in your response.
-            For General category students, DO NOT include Caste Certificate.
-            Always include basic documents: 10th Marksheet, 12th Marksheet, Aadhaar Card.""",
+            instruction="""Compare student profiles against mandatory requirements only.
+            NEVER treat special_categories as mandatory.
+            Always include missing_documents, mandatory_met, special_category_eligible, and has_alternative_path.""",
             tools=[FunctionTool(check_eligibility)]
         )

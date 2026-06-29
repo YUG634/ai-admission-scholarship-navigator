@@ -7,7 +7,6 @@ export const analyzeScholarship = async (pdfFile, profileData) => {
   }
 
   const formData = new FormData();
-  // FastAPI expects 'pdf_file' and individual fields
   formData.append('pdf_file', pdfFile);
   formData.append('full_name', profileData.name || '');
   formData.append('state', profileData.state || '');
@@ -19,16 +18,7 @@ export const analyzeScholarship = async (pdfFile, profileData) => {
   try {
     console.log('📤 Sending request to FastAPI backend...');
     console.log('📄 File:', pdfFile.name, pdfFile.size, 'bytes');
-    console.log('👤 Profile:', {
-      full_name: profileData.name,
-      state: profileData.state,
-      category: profileData.category,
-      family_income: parseFloat(profileData.income || 0),
-      current_qualification: profileData.qualification,
-      marks_percentage: parseFloat(profileData.marks || 0)
-    });
 
-    // ✅ FastAPI endpoint
     const response = await fetch(`${API_BASE_URL}/api/v1/analyze`, {
       method: 'POST',
       body: formData,
@@ -42,7 +32,40 @@ export const analyzeScholarship = async (pdfFile, profileData) => {
 
     const data = await response.json();
     console.log('✅ Analysis successful:', data);
-    return data;
+    
+    // ✅ Map backend response to frontend types
+    return {
+      success: true,
+      analysis: {
+        scholarship_name: data.analysis?.scholarship_name || '',
+        deadline: data.analysis?.deadline || '',
+        mandatory_requirements: data.analysis?.mandatory_requirements || [],
+        special_categories: data.analysis?.special_categories || [],
+        alternative_admission_paths: data.analysis?.alternative_admission_paths || [],
+        required_documents: data.analysis?.required_documents || [],
+        important_instructions: data.analysis?.important_instructions || [],
+        document_type: data.analysis?.document_type
+      },
+      eligibility: {
+        status: data.eligibility?.status || 'Not Eligible',
+        reasons: data.eligibility?.reasons || [],
+        score: data.eligibility?.score || 0,
+        matching_criteria: data.eligibility?.matching_criteria || [],
+        missing_criteria: data.eligibility?.missing_criteria || [],
+        missing_documents: data.eligibility?.missing_documents || [],
+        mandatory_met: data.eligibility?.mandatory_met || false,
+        special_category_eligible: data.eligibility?.special_category_eligible || false,
+        has_alternative_path: data.eligibility?.has_alternative_path || false
+      },
+      actionPlan: {
+        immediate_actions: data.action_plan?.immediate_actions || [],
+        checklist: data.action_plan?.checklist || [],
+        missing_documents: data.action_plan?.missing_documents || [],
+        recommendations: data.action_plan?.recommendations || [],
+        next_steps: data.action_plan?.next_steps || [],
+        timeline: data.action_plan?.timeline || {}
+      }
+    };
   } catch (error) {
     console.error('❌ API Error:', error);
     throw error;
@@ -51,7 +74,6 @@ export const analyzeScholarship = async (pdfFile, profileData) => {
 
 export const healthCheck = async () => {
   try {
-    // ✅ FastAPI health endpoint
     const response = await fetch(`${API_BASE_URL}/api/v1/health`);
     if (!response.ok) {
       throw new Error('Health check failed');
