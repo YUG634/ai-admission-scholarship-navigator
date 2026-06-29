@@ -1,4 +1,4 @@
-// Use the Node.js server on port 3000
+// src/services/api.js
 const API_BASE_URL = 'https://ai-admission-scholarship-navigator.onrender.com';
 
 export const analyzeScholarship = async (pdfFile, profileData) => {
@@ -7,29 +7,29 @@ export const analyzeScholarship = async (pdfFile, profileData) => {
   }
 
   const formData = new FormData();
-  formData.append('pdf', pdfFile);
-  formData.append('profile', JSON.stringify({
-    name: profileData.name || '',
-    state: profileData.state || '',
-    category: profileData.category || 'General',
-    income: String(profileData.income || '0').replace(/,/g, ''),
-    qualification: profileData.qualification || '',
-    marks: String(profileData.marks || '0').replace('%', '').trim()
-  }));
+  // FastAPI expects 'pdf_file' and individual fields
+  formData.append('pdf_file', pdfFile);
+  formData.append('full_name', profileData.name || '');
+  formData.append('state', profileData.state || '');
+  formData.append('category', profileData.category || 'General');
+  formData.append('family_income', parseFloat(profileData.income || 0));
+  formData.append('current_qualification', profileData.qualification || '');
+  formData.append('marks_percentage', parseFloat(profileData.marks || 0));
 
   try {
-    console.log('📤 Sending request to Node.js server...');
+    console.log('📤 Sending request to FastAPI backend...');
     console.log('📄 File:', pdfFile.name, pdfFile.size, 'bytes');
     console.log('👤 Profile:', {
-      name: profileData.name,
+      full_name: profileData.name,
       state: profileData.state,
       category: profileData.category,
-      income: String(profileData.income || '0').replace(/,/g, ''),
-      qualification: profileData.qualification,
-      marks: String(profileData.marks || '0').replace('%', '').trim()
+      family_income: parseFloat(profileData.income || 0),
+      current_qualification: profileData.qualification,
+      marks_percentage: parseFloat(profileData.marks || 0)
     });
 
-    const response = await fetch(`${API_BASE_URL}/api/upload-pdf`, {
+    // ✅ FastAPI endpoint
+    const response = await fetch(`${API_BASE_URL}/api/v1/analyze`, {
       method: 'POST',
       body: formData,
     });
@@ -37,7 +37,7 @@ export const analyzeScholarship = async (pdfFile, profileData) => {
     if (!response.ok) {
       const errorData = await response.json();
       console.error('❌ Server error:', errorData);
-      throw new Error(errorData.error || 'Analysis failed');
+      throw new Error(errorData.detail || 'Analysis failed');
     }
 
     const data = await response.json();
@@ -51,7 +51,8 @@ export const analyzeScholarship = async (pdfFile, profileData) => {
 
 export const healthCheck = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/health`);
+    // ✅ FastAPI health endpoint
+    const response = await fetch(`${API_BASE_URL}/api/v1/health`);
     if (!response.ok) {
       throw new Error('Health check failed');
     }
