@@ -335,8 +335,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ### Yug Agrawal
 
 [![GitHub](https://img.shields.io/badge/GitHub-YUG634-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/YUG634)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Yug%20Agrawal-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://linkedin.com/in/yug-agrawal)
-[![Email](https://img.shields.io/badge/Email-yugagrawal634%40gmail.com-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:yugagrawal634@gmail.com)
+[![LinkedIn](www.linkedin.com/in/yug-agrawal-101bb11a0)
+[![Email](https://img.shields.io/badge/Email-yugagrawalmng%40gmail.com-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:yugagrawalmng@gmail.com)
 
 ---
 
