@@ -1,5 +1,5 @@
 // Use the Node.js server on port 3000
-const API_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = 'https://ai-admission-scholarship-navigator.onrender.com';
 
 export const analyzeScholarship = async (pdfFile, profileData) => {
   if (!pdfFile) {
