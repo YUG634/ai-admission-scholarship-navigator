@@ -207,7 +207,6 @@ export default function Dashboard() {
     setResults(sample.data);
     setError(null);
     setCompletedTasks({});
-    // Scroll smoothly to dashboard results
     document.getElementById("results-scroll-anchor")?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -215,13 +214,11 @@ export default function Dashboard() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate PDF
     if (!pdfFile) {
       setError("Please upload a Scholarship/Admission PDF or select a sample above.");
       return;
     }
 
-    // Validate profile fields
     const requiredFields = ['name', 'state', 'category', 'income', 'qualification', 'marks'];
     const missingFields = requiredFields.filter(field => !profile[field as keyof StudentProfile]);
     
@@ -236,63 +233,71 @@ export default function Dashboard() {
     setCompletedTasks({});
 
     try {
-      // Step 1: Document Analysis Agent
       setActiveAgent(1);
       setCurrentStatusText("Agent 1: Extracting guidelines, dates & eligibility criteria from PDF...");
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // Step 2: Eligibility Agent
       setActiveAgent(2);
       setCurrentStatusText("Agent 2: Mapping your student profile against extracted guidelines...");
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // Step 3: Action Plan Agent
       setActiveAgent(3);
       setCurrentStatusText("Agent 3: Generating personalized checklist and application strategy...");
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // Call the actual API
       const response = await analyzeScholarship(pdfFile, profile);
       
       console.log('📊 Full response:', response);
       console.log('📊 Analysis:', response.analysis);
       console.log('📊 Eligibility:', response.eligibility);
-      console.log('📊 Action Plan:', response.actionPlan || response.action_plan);
+      console.log('📊 Action Plan:', response.actionPlan);
 
-      // ✅ FIX: Check both camelCase (actionPlan) and snake_case (action_plan)
-      const actionPlanData = response.actionPlan || response.action_plan || {};
-      
-      // Transform API response to match your UI structure
+      // ✅ TRANSFORM THE RESPONSE TO MATCH UI EXPECTATIONS
       const transformedResults: AgentPipelineResponse = {
         success: true,
         analysis: {
           scholarship_name: response.analysis?.scholarship_name || "Scholarship Name Not Found",
           deadline: response.analysis?.deadline || "Deadline Not Specified",
-          eligibility_criteria: response.analysis?.eligibility_criteria || [],
+          // ✅ Use mandatory_requirements OR eligibility_criteria
+          eligibility_criteria: response.analysis?.mandatory_requirements || 
+                                response.analysis?.eligibility_criteria || [],
           required_documents: response.analysis?.required_documents || [],
-          instructions: response.analysis?.instructions || 
-                        response.analysis?.important_instructions?.join('\n') || 
-                        "Instructions not available"
+          // ✅ Use important_instructions OR instructions
+          instructions: response.analysis?.important_instructions?.join('\n') || 
+                        response.analysis?.instructions || 
+                        "Instructions not available",
+          // ✅ Pass through additional fields for future use
+          document_type: response.analysis?.document_type,
+          special_categories: response.analysis?.special_categories,
+          alternative_admission_paths: response.analysis?.alternative_admission_paths,
+          mandatory_requirements: response.analysis?.mandatory_requirements,
+          important_instructions: response.analysis?.important_instructions
         },
         eligibility: {
-          status: response.eligibility?.status as 'Eligible' | 'Partially Eligible' | 'Not Eligible' || 'Not Eligible',
-          reasons: response.eligibility?.reasons || ["Unable to determine eligibility"]
+          status: response.eligibility?.status || 'Not Eligible',
+          reasons: response.eligibility?.reasons || ["Unable to determine eligibility"],
+          score: response.eligibility?.score,
+          matching_criteria: response.eligibility?.matching_criteria,
+          missing_criteria: response.eligibility?.missing_criteria,
+          mandatory_met: response.eligibility?.mandatory_met,
+          special_category_eligible: response.eligibility?.special_category_eligible,
+          has_alternative_path: response.eligibility?.has_alternative_path
         },
         actionPlan: {
-          checklist: actionPlanData.checklist?.map((item: any) => ({
-            task: item.task,
-            priority: item.priority as 'High' | 'Medium' | 'Low',
-            timeframe: item.timeframe || item.deadline || 'ASAP'
-          })) || [],
-          missing_documents: actionPlanData.missing_documents || [],
-          recommendations: actionPlanData.recommendations || []
+          // ✅ Use actionPlan from response
+          checklist: response.actionPlan?.checklist || [],
+          missing_documents: response.actionPlan?.missing_documents || [],
+          recommendations: response.actionPlan?.recommendations || [],
+          // ✅ Additional fields for future use
+          immediate_actions: response.actionPlan?.immediate_actions || [],
+          next_steps: response.actionPlan?.next_steps || [],
+          timeline: response.actionPlan?.timeline || {}
         }
       };
 
       console.log('📊 Transformed results:', transformedResults);
       setResults(transformedResults);
       
-      // Scroll to results
       setTimeout(() => {
         document.getElementById("results-scroll-anchor")?.scrollIntoView({ behavior: "smooth" });
       }, 100);
@@ -731,24 +736,28 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* Extract Criteria list */}
+                  {/* ✅ Updated: Show eligibility criteria (now from mandatory_requirements) */}
                   <div className="space-y-3">
-                    <h5 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Extracted Criteria Guidelines</h5>
+                    <h5 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Eligibility Criteria</h5>
                     <ul className="space-y-2">
-                      {results.analysis?.eligibility_criteria.map((rule, idx) => (
-                        <li key={idx} className="text-sm text-zinc-300 flex items-start gap-2">
-                          <span className="text-accent-blue mt-1 font-bold">▪</span>
-                          <span>{rule}</span>
-                        </li>
-                      ))}
+                      {results.analysis?.eligibility_criteria && results.analysis.eligibility_criteria.length > 0 ? (
+                        results.analysis.eligibility_criteria.map((rule, idx) => (
+                          <li key={idx} className="text-sm text-zinc-300 flex items-start gap-2">
+                            <span className="text-accent-blue mt-1 font-bold">▪</span>
+                            <span>{rule}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-sm text-zinc-500">No specific eligibility criteria found in the document.</li>
+                      )}
                     </ul>
                   </div>
 
-                  {/* Extract Guidelines */}
+                  {/* ✅ Updated: Show important instructions */}
                   <div className="space-y-2 pt-4 border-t border-zinc-800">
-                    <h5 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Key Portal Instructions</h5>
-                    <p className="text-sm text-zinc-300 leading-relaxed">
-                      {results.analysis?.instructions}
+                    <h5 className="text-xs font-bold text-zinc-400 uppercase tracking-widest">Key Instructions</h5>
+                    <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
+                      {results.analysis?.instructions || "No specific instructions found."}
                     </p>
                   </div>
                 </div>
@@ -760,12 +769,16 @@ export default function Dashboard() {
                     Eligibility Mapping Analysis
                   </h3>
                   <div className="space-y-3 mt-4">
-                    {results.eligibility?.reasons.map((reason, idx) => (
-                      <div key={idx} className="flex gap-3 p-3 bg-zinc-950/40 rounded-xl border border-zinc-900 items-start">
-                        <CheckCircle className="w-5 h-5 text-accent-blue shrink-0 mt-0.5" />
-                        <p className="text-sm text-zinc-300">{reason}</p>
-                      </div>
-                    ))}
+                    {results.eligibility?.reasons && results.eligibility.reasons.length > 0 ? (
+                      results.eligibility.reasons.map((reason, idx) => (
+                        <div key={idx} className="flex gap-3 p-3 bg-zinc-950/40 rounded-xl border border-zinc-900 items-start">
+                          <CheckCircle className="w-5 h-5 text-accent-blue shrink-0 mt-0.5" />
+                          <p className="text-sm text-zinc-300">{reason}</p>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-zinc-500">No specific reasons provided.</p>
+                    )}
                   </div>
                 </div>
 
@@ -779,12 +792,16 @@ export default function Dashboard() {
                       <h4 className="font-display font-bold text-md text-white">Required Documents</h4>
                     </div>
                     <ul className="space-y-2 pt-2">
-                      {results.analysis?.required_documents.map((doc, idx) => (
-                        <li key={idx} className="text-xs font-medium text-zinc-300 bg-zinc-950 p-2.5 rounded-xl border border-zinc-850 flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-accent-blue" />
-                          <span className="truncate">{doc}</span>
-                        </li>
-                      ))}
+                      {results.analysis?.required_documents && results.analysis.required_documents.length > 0 ? (
+                        results.analysis.required_documents.map((doc, idx) => (
+                          <li key={idx} className="text-xs font-medium text-zinc-300 bg-zinc-950 p-2.5 rounded-xl border border-zinc-850 flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-accent-blue" />
+                            <span className="truncate">{doc}</span>
+                          </li>
+                        ))
+                      ) : (
+                        <li className="text-xs text-zinc-500">No specific documents listed.</li>
+                      )}
                     </ul>
                   </div>
 
@@ -792,18 +809,18 @@ export default function Dashboard() {
                   <div className="bg-zinc-900/70 border border-white/5 rounded-3xl p-6 backdrop-blur-md shadow-xl space-y-4">
                     <div className="flex items-center gap-2">
                       <AlertTriangle className="w-5 h-5 text-amber-500" />
-                      <h4 className="font-display font-bold text-md text-white">Missing / Prep List</h4>
+                      <h4 className="font-display font-bold text-md text-white">Missing Documents</h4>
                     </div>
                     <ul className="space-y-2 pt-2">
-                      {results.actionPlan?.missing_documents.length === 0 ? (
-                        <p className="text-xs text-zinc-400">All documents are ready or present in candidate registry.</p>
-                      ) : (
-                        results.actionPlan?.missing_documents.map((doc, idx) => (
+                      {results.actionPlan?.missing_documents && results.actionPlan.missing_documents.length > 0 ? (
+                        results.actionPlan.missing_documents.map((doc, idx) => (
                           <li key={idx} className="text-xs font-medium text-amber-300 bg-amber-500/5 p-2.5 rounded-xl border border-amber-500/20 flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
                             <span className="truncate">{doc}</span>
                           </li>
                         ))
+                      ) : (
+                        <li className="text-xs text-zinc-500">No missing documents identified.</li>
                       )}
                     </ul>
                   </div>
@@ -822,55 +839,57 @@ export default function Dashboard() {
                     <div className="text-right">
                       <span className="text-xs font-medium text-zinc-400">COMPLETED TASKS</span>
                       <p className="text-sm font-bold text-accent-blue">
-                        {Object.values(completedTasks).filter(Boolean).length} / {results.actionPlan?.checklist.length}
+                        {Object.values(completedTasks).filter(Boolean).length} / {results.actionPlan?.checklist?.length || 0}
                       </p>
                     </div>
                   </div>
 
                   {/* Checklist Table */}
                   <div className="space-y-3">
-                    {results.actionPlan?.checklist.map((item, idx) => {
-                      const isChecked = !!completedTasks[item.task];
-                      return (
-                        <div 
-                          key={idx}
-                          onClick={() => toggleTask(item.task)}
-                          className={`flex items-start gap-3 p-4 rounded-2xl border transition-all cursor-pointer hover:bg-zinc-900 ${
-                            isChecked 
-                              ? "bg-zinc-950/20 border-emerald-500/10 opacity-70" 
-                              : "bg-zinc-950/60 border-zinc-850 hover:border-zinc-700"
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => {}} // toggled on container click
-                            className="mt-1 h-4 w-4 rounded-sm border-zinc-700 text-accent-blue focus:ring-accent-blue cursor-pointer"
-                          />
-                          <div className="flex-grow space-y-1">
-                            <p className={`text-sm font-medium ${isChecked ? "line-through text-zinc-500" : "text-white"}`}>
-                              {item.task}
-                            </p>
-                            <div className="flex flex-wrap items-center gap-2 mt-2">
-                              {/* Priority badge */}
-                              <span className={`text-[9px] uppercase font-extrabold px-2 py-0.5 rounded-full ${
-                                item.priority === "High" 
-                                  ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                                  : item.priority === "Medium"
-                                    ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
-                                    : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
-                              }`}>
-                                {item.priority} Priority
-                              </span>
-                              {/* Timeframe badge */}
-                              <span className="text-[10px] font-mono text-zinc-400 flex items-center gap-1">
-                                <Clock className="w-3 h-3" /> {item.timeframe}
-                              </span>
+                    {results.actionPlan?.checklist && results.actionPlan.checklist.length > 0 ? (
+                      results.actionPlan.checklist.map((item, idx) => {
+                        const isChecked = !!completedTasks[item.task];
+                        return (
+                          <div 
+                            key={idx}
+                            onClick={() => toggleTask(item.task)}
+                            className={`flex items-start gap-3 p-4 rounded-2xl border transition-all cursor-pointer hover:bg-zinc-900 ${
+                              isChecked 
+                                ? "bg-zinc-950/20 border-emerald-500/10 opacity-70" 
+                                : "bg-zinc-950/60 border-zinc-850 hover:border-zinc-700"
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={() => {}}
+                              className="mt-1 h-4 w-4 rounded-sm border-zinc-700 text-accent-blue focus:ring-accent-blue cursor-pointer"
+                            />
+                            <div className="flex-grow space-y-1">
+                              <p className={`text-sm font-medium ${isChecked ? "line-through text-zinc-500" : "text-white"}`}>
+                                {item.task}
+                              </p>
+                              <div className="flex flex-wrap items-center gap-2 mt-2">
+                                <span className={`text-[9px] uppercase font-extrabold px-2 py-0.5 rounded-full ${
+                                  item.priority === "High" 
+                                    ? "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                                    : item.priority === "Medium"
+                                      ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                      : "bg-blue-500/10 text-blue-400 border border-blue-500/20"
+                                }`}>
+                                  {item.priority} Priority
+                                </span>
+                                <span className="text-[10px] font-mono text-zinc-400 flex items-center gap-1">
+                                  <Clock className="w-3 h-3" /> {item.timeframe}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })
+                    ) : (
+                      <p className="text-sm text-zinc-500 text-center py-4">No checklist items available.</p>
+                    )}
                   </div>
 
                   {/* Strategic Advisor recommendations */}
@@ -879,11 +898,15 @@ export default function Dashboard() {
                       Strategic Advisor Guidance
                     </h5>
                     <div className="space-y-3">
-                      {results.actionPlan?.recommendations.map((rec, idx) => (
-                        <p key={idx} className="text-sm text-zinc-300 leading-relaxed font-light">
-                          💡 <strong className="font-semibold text-white">Advice {idx + 1}:</strong> {rec}
-                        </p>
-                      ))}
+                      {results.actionPlan?.recommendations && results.actionPlan.recommendations.length > 0 ? (
+                        results.actionPlan.recommendations.map((rec, idx) => (
+                          <p key={idx} className="text-sm text-zinc-300 leading-relaxed font-light">
+                            💡 <strong className="font-semibold text-white">Advice {idx + 1}:</strong> {rec}
+                          </p>
+                        ))
+                      ) : (
+                        <p className="text-sm text-zinc-500">No specific recommendations available.</p>
+                      )}
                     </div>
                   </div>
 
