@@ -7,7 +7,6 @@ class ADKActionAgent:
     def __init__(self):
         self.gemini = GeminiService()
         self.agent = self._create_agent()
-        # Fix: Use 'func' instead of '_func'
         self.tool_func = self.agent.tools[0].func
     
     def _create_agent(self):
@@ -19,23 +18,22 @@ class ADKActionAgent:
             DOCUMENT ANALYSIS: {analysis_json}
             ELIGIBILITY: {eligibility_json}
 
-            Consider:
-            - Document type (scholarship vs admission)
-            - If admission: focus on application steps and deadlines
-            - If scholarship: focus on eligibility requirements and missing documents
-            - Special categories mentioned are OPTIONAL, not mandatory
+            CRITICAL RULES:
+            1. Use the actual deadlines from the document
+            2. Create checklist items for each step in the admission process
+            3. Include tasks for gathering missing documents
+            4. Use the eligibility status and reasons to guide recommendations
 
             Return ONLY valid JSON:
             {{
                 "immediate_actions": [
-                    "Most urgent actions first"
+                    "Most urgent actions first based on earliest deadlines"
                 ],
                 "checklist": [
-                    {{"task": "Task description", "priority": "High/Medium/Low", "deadline": "Date or timeframe"}}
+                    {{"task": "Task description", "priority": "High/Medium/Low", "deadline": "Actual date from document"}}
                 ],
                 "missing_documents": [
-                    "Documents to gather",
-                    "Be specific about what's needed"
+                    "Documents the student needs to gather"
                 ],
                 "recommendations": [
                     "Strategic advice for successful application"
@@ -58,10 +56,8 @@ class ADKActionAgent:
         return Agent(
             name="ActionPlanAgent",
             model="gemini-2.5-flash",
-            instruction="""You are an action plan generator agent.
-            Create personalized, actionable plans.
-            If this is an admission notification, focus on application process and deadlines.
-            If this is a scholarship, focus on eligibility and document gathering.
-            Always be encouraging and practical.""",
+            instruction="""Create action plans using the actual deadlines from the document.
+            Every checklist item should have a specific deadline from the document.
+            Include tasks for gathering missing documents identified by the eligibility agent.""",
             tools=[FunctionTool(generate_action_plan)]
         )

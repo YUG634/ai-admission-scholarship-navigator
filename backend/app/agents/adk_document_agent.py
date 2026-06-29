@@ -12,17 +12,32 @@ class ADKDocumentAgent:
     def _create_agent(self):
         def extract_scholarship_info(text: str) -> dict:
             prompt = f"""
-            You are an expert document analyst. Analyze this document and classify it properly.
+            You are an expert document analyst. Extract EVERYTHING from this document.
 
             Document text:
-            {text[:8000]}
+            {text[:10000]}
 
-            CRITICAL: Look for sections like "List of Required Documents", "Documents Required", 
-            "Checklist", or numbered/bulleted lists of documents. Extract each document individually.
+            CRITICAL: Find the document list in this document. Look for:
+            - "LIST OF REQUIRED DOCUMENTS"
+            - "Documents Required"  
+            - "Checklist"
+            - Numbered lists with ☐ or • or -
 
-            For checkbox lists (like ☐ 1. 10th Marksheet), extract each item separately.
+            Extract EACH document individually. DO NOT summarize.
 
-            Return ONLY valid JSON with this EXACT structure:
+            For example, if you see:
+            ☐ 1. 10th Marksheet
+            ☐ 2. 12th Marksheet
+            ☐ 3. 12th Leaving Certificate
+
+            You MUST return:
+            "required_documents": [
+                "10th Marksheet",
+                "12th Marksheet", 
+                "12th Leaving Certificate"
+            ]
+
+            Return ONLY valid JSON:
             {{
                 "document_type": "scholarship" or "admission" or "unknown",
                 "scholarship_name": "Full name of the program/scholarship",
@@ -37,37 +52,24 @@ class ADKDocumentAgent:
                     "Different ways to qualify"
                 ],
                 "required_documents": [
-                    "List each document separately with full name",
-                    "Example: 10th Marksheet",
-                    "Example: 12th Marksheet",
-                    "Example: Aadhaar Card Copy"
+                    "Extract EVERY document from the list",
+                    "10th Marksheet",
+                    "12th Marksheet",
+                    "12th Leaving Certificate",
+                    "Aadhaar Card Copy",
+                    "Include ALL documents, even optional ones"
                 ],
                 "important_instructions": [
                     "Important application instructions"
                 ]
             }}
-
-            RULES FOR EXTRACTING REQUIRED DOCUMENTS:
-            1. Look for sections with titles like: "LIST OF REQUIRED DOCUMENTS", "Documents Required", "Checklist"
-            2. Extract each document individually, including:
-               - 10th Marksheet, 12th Marksheet
-               - Leaving Certificate, Transfer Certificate, Migration Certificate
-               - Aadhaar Card, ID Proof
-               - Caste Certificate, Income Certificate, Domicile Certificate
-               - Entrance Exam Certificate, Scorecards
-               - Photographs, Signature
-               - Any other specific documents mentioned
-            3. For checkbox lists (☐, ✓, etc.), extract each item
-            4. Include ALL documents mentioned in the document
             """
             return self.gemini.generate_structured_response(prompt)
         
         return Agent(
             name="DocumentAnalysisAgent",
-            model="gemini-2.0-flash",
-            instruction="""You are a specialized agent for analyzing scholarship and admission documents.
-            Your primary responsibility is to extract structured information and properly classify documents.
-            Always extract specific document names from lists, especially checkbox lists.
-            Include ALL documents mentioned in the document.""",
+            model="gemini-2.5-flash",
+            instruction="""Extract ALL required documents from lists. NEVER summarize. Extract each document individually.
+            If the document has a checkbox list with 14 items, return all 14 items as separate strings.""",
             tools=[FunctionTool(extract_scholarship_info)]
         )
