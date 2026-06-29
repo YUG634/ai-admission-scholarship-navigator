@@ -1,4 +1,3 @@
-// src/services/api.js
 const API_BASE_URL = 'https://ai-admission-scholarship-navigator.onrender.com';
 
 export const analyzeScholarship = async (pdfFile, profileData) => {
@@ -33,37 +32,23 @@ export const analyzeScholarship = async (pdfFile, profileData) => {
     const data = await response.json();
     console.log('✅ Analysis successful:', data);
     
-    // ✅ Map backend response to frontend types
     return {
       success: true,
       analysis: {
         scholarship_name: data.analysis?.scholarship_name || '',
         deadline: data.analysis?.deadline || '',
-        mandatory_requirements: data.analysis?.mandatory_requirements || [],
-        special_categories: data.analysis?.special_categories || [],
-        alternative_admission_paths: data.analysis?.alternative_admission_paths || [],
+        eligibility_criteria: data.analysis?.mandatory_requirements || [],
         required_documents: data.analysis?.required_documents || [],
-        important_instructions: data.analysis?.important_instructions || [],
-        document_type: data.analysis?.document_type
+        instructions: data.analysis?.important_instructions?.join('\n') || ''
       },
       eligibility: {
         status: data.eligibility?.status || 'Not Eligible',
-        reasons: data.eligibility?.reasons || [],
-        score: data.eligibility?.score || 0,
-        matching_criteria: data.eligibility?.matching_criteria || [],
-        missing_criteria: data.eligibility?.missing_criteria || [],
-        missing_documents: data.eligibility?.missing_documents || [],
-        mandatory_met: data.eligibility?.mandatory_met || false,
-        special_category_eligible: data.eligibility?.special_category_eligible || false,
-        has_alternative_path: data.eligibility?.has_alternative_path || false
+        reasons: data.eligibility?.reasons || []
       },
       actionPlan: {
-        immediate_actions: data.action_plan?.immediate_actions || [],
         checklist: data.action_plan?.checklist || [],
         missing_documents: data.action_plan?.missing_documents || [],
-        recommendations: data.action_plan?.recommendations || [],
-        next_steps: data.action_plan?.next_steps || [],
-        timeline: data.action_plan?.timeline || {}
+        recommendations: data.action_plan?.recommendations || []
       }
     };
   } catch (error) {
