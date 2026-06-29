@@ -1,226 +1,136 @@
-<div align="center">
-  <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
-  <img src="https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
-  <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React"/>
-  <img src="https://img.shields.io/badge/Google_ADK-0.1.0-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Google ADK"/>
-  <img src="https://img.shields.io/badge/Gemini-2.5_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Gemini"/>
-  <img src="https://img.shields.io/badge/Tailwind_CSS-4.0-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"/>
-  <img src="https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge" alt="License"/>
-</div>
 
-<br>
+
+```markdown
+# 🎓 AI Admission & Scholarship Navigator
 
 <div align="center">
-  <h1>🎓 AI Admission & Scholarship Navigator</h1>
-  <p><strong>A Multi-Agent AI System for Demystifying Admissions and Scholarships</strong></p>
-  <p>Built with Google ADK, Gemini 2.5 Flash, FastAPI, and React</p>
-  <br>
-  <a href="#-live-demo">View Demo</a> •
-  <a href="#-features">Features</a> •
-  <a href="#-architecture">Architecture</a> •
-  <a href="#-quick-start">Quick Start</a> •
-  <a href="#-deployment">Deployment</a>
+
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=white)](https://reactjs.org/)
+[![Google ADK](https://img.shields.io/badge/Google_ADK-0.1.0-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://github.com/google/adk-python)
+[![Gemini](https://img.shields.io/badge/Gemini-2.5_Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
+
 </div>
 
 ---
 
-## 📖 Table of Contents
+## 📖 Overview
 
-- [Overview](#-overview)
-- [Problem Statement](#-problem-statement)
-- [Features](#-features)
-- [Architecture](#-architecture)
-- [Tech Stack](#-tech-stack)
-- [Screenshots](#-screenshots)
-- [Quick Start](#-quick-start)
-- [API Documentation](#-api-documentation)
-- [Deployment](#-deployment)
-- [Project Structure](#-project-structure)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Acknowledgments](#-acknowledgments)
-- [Made By](#-made-by)
+**AI Admission & Scholarship Navigator** is a multi-agent AI system that helps students understand complex admission notifications and scholarship PDFs. It uses Google ADK and Gemini 2.5 Flash to transform lengthy documents into personalized, actionable plans.
 
----
+### The Problem
 
-## 🚀 Overview
+Students face significant challenges with admission and scholarship documents:
+- Complex legal and educational jargon
+- Confusing eligibility criteria
+- Difficult-to-track deadlines
+- Unclear document requirements
+- Misinterpreted special categories as mandatory
 
-**AI Admission & Scholarship Navigator** is a production-grade, multi-agent AI system that transforms lengthy, confusing admission notifications and scholarship PDFs into personalized, actionable insights.
+### The Solution
 
-### 🎯 The Problem
-
-Students, especially first-generation applicants and those from rural areas, face significant challenges:
-
-- 📄 **Complex Documents**: Admission notifications are lengthy and filled with legal/educational jargon
-- 🎯 **Confusing Eligibility**: Criteria are buried in complex language and often misinterpreted
-- ⏰ **Missed Deadlines**: Important dates are difficult to track
-- 📋 **Document Confusion**: Students don't know which documents to gather
-- 🏷️ **Category Confusion**: Special categories are often misunderstood as mandatory requirements
-
-### 💡 The Solution
-
-Our system uses **3 specialized AI agents** powered by Google ADK and Gemini 2.5 Flash to:
-
-1. **Analyze Documents** - Extract key information from PDFs with smart classification
-2. **Check Eligibility** - Compare student profiles against requirements fairly
-3. **Generate Action Plans** - Create personalized checklists with deadlines and next steps
+Three specialized AI agents work together to:
+1. **Analyze Documents** - Extract and classify information
+2. **Check Eligibility** - Fairly compare student profiles against requirements
+3. **Generate Action Plans** - Create personalized checklists and timelines
 
 ---
 
 ## ✨ Features
 
-### 🤖 Multi-Agent AI System
+### Multi-Agent AI System
 
 | Agent | Function | Key Capabilities |
 |-------|----------|------------------|
-| **Document Analysis Agent** | PDF Processing & Classification | Extracts scholarship/admission details, distinguishes between mandatory and optional criteria |
-| **Eligibility Agent** | Profile Comparison | Fair assessment that never rejects students for optional special categories |
-| **Action Plan Agent** | Personalized Planning | Creates checklists with priorities, deadlines, missing documents, and timelines |
+| Document Analysis | PDF Processing & Classification | Extracts details, distinguishes mandatory vs optional |
+| Eligibility Check | Profile Comparison | Fair assessment, never rejects for optional categories |
+| Action Plan | Personalized Planning | Creates checklists with priorities, deadlines, and timelines |
 
-### 🎯 Smart Document Classification
+### Smart Document Classification
 
-- ✅ Distinguishes between **Scholarship** and **Admission** notifications
-- ✅ Separates **Mandatory Requirements** from **Optional Special Categories**
-- ✅ Identifies **Alternative Admission Paths** (MHCET, H-CET, H-LAT, etc.)
-- ✅ Never treats special categories (Minority, In-house, Reserved) as mandatory
+- Distinguishes between Scholarship and Admission notifications
+- Separates Mandatory Requirements from Optional Special Categories
+- Identifies Alternative Admission Paths
+- Never treats special categories as mandatory
 
-### 📋 Personalized Action Plans
+### Personalized Action Plans
 
-- ✅ Immediate actions prioritized by urgency
-- ✅ Checklist with priority levels (High/Medium/Low)
-- ✅ Missing documents identification
-- ✅ Strategic recommendations
-- ✅ Week-by-week timeline
-- ✅ Interactive checklist tracking
+- Immediate actions with priorities
+- Checklist with High/Medium/Low priorities
+- Missing documents identification
+- Strategic recommendations
+- Week-by-week timeline
+- Interactive checklist tracking
 
-### 🎨 Beautiful User Interface
+### Beautiful User Interface
 
-- ✅ Modern, Google-inspired design
-- ✅ Responsive for mobile and desktop
-- ✅ Real-time agent status updates
-- ✅ Smooth animations with Framer Motion
-- ✅ Drag-and-drop PDF upload
+- Modern, Google-inspired design
+- Fully responsive for mobile and desktop
+- Real-time agent status updates
+- Smooth animations with Framer Motion
+- Drag-and-drop PDF upload
 
 ---
 
 ## 🏗️ Architecture
 
+### System Flow
+
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│ User Browser                                                    │
-│ (Netlify Deployment)                                            │
-└─────────────────────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ React Frontend (Vite)                                           │
-│ - Tailwind CSS for styling                                      │
-│ - Framer Motion for animations                                  │
-│ - Lucide React for icons                                        │
-└─────────────────────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ FastAPI Backend (Render)                                        │
-│ - RESTful API endpoints                                          │
-│ - CORS configuration                                            │
-│ - PDF processing with PyPDF2                                    │
-│ - Error handling & logging                                      │
-└─────────────────────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ Google ADK Multi-Agent System                                   │
-│ │
-│ ┌──────────────────────────────────────────────────────────┐   │
-│ │ Agent 1: Document Analysis Agent                         │   │
-│ │ - Extracts scholarship/admission details                 │   │
-│ │ - Classifies document type (scholarship/admission)       │   │
-│ │ - Separates mandatory vs optional criteria               │   │
-│ │ - Identifies alternative admission paths                 │   │
-│ └──────────────────────────────────────────────────────────┘   │
-│ ▼                                                               │
-│ ┌──────────────────────────────────────────────────────────┐   │
-│ │ Agent 2: Eligibility Agent                               │   │
-│ │ - Compares profile against requirements                  │   │
-│ │ - Never penalizes for optional categories                │   │
-│ │ - Provides detailed reasoning                            │   │
-│ │ - Calculates eligibility score                           │   │
-│ └──────────────────────────────────────────────────────────┘   │
-│ ▼                                                               │
-│ ┌──────────────────────────────────────────────────────────┐   │
-│ │ Agent 3: Action Plan Agent                               │   │
-│ │ - Creates personalized checklists                        │   │
-│ │ - Identifies missing documents                           │   │
-│ │ - Generates timeline & next steps                        │   │
-│ │ - Provides strategic recommendations                     │   │
-│ └──────────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────────┘
-│
-▼
-┌─────────────────────────────────────────────────────────────────┐
-│ Google Gemini 2.5 Flash                                         │
-│ (AI Model for all agents)                                       │
-└─────────────────────────────────────────────────────────────────┘
+User Browser → React Frontend → FastAPI Backend → Google ADK Agents → Gemini 2.5 Flash
 ```
+
+### Agent Pipeline
+
+**1. Document Analysis Agent**
+- Extracts and classifies document information
+- Separates mandatory from optional criteria
+- Identifies alternative admission paths
+
+**2. Eligibility Agent**
+- Compares profile against requirements
+- Never penalizes for optional categories
+- Provides detailed reasoning
+
+**3. Action Plan Agent**
+- Creates personalized checklists
+- Identifies missing documents
+- Generates timeline and next steps
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Backend
+
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| **Python** | 3.11+ | Core language |
-| **FastAPI** | 0.115+ | Web framework |
-| **Google ADK** | 0.1.0 | Agent framework |
-| **Gemini 2.5 Flash** | Latest | AI model |
-| **PyPDF2** | 3.0+ | PDF text extraction |
-| **Uvicorn** | 0.24+ | ASGI server |
+| Python | 3.11+ | Core language |
+| FastAPI | 0.115+ | Web framework |
+| Google ADK | 0.1.0 | Agent framework |
+| Gemini 2.5 Flash | Latest | AI model |
+| PyPDF2 | 3.0+ | PDF text extraction |
+| Uvicorn | 0.24+ | ASGI server |
 
 ### Frontend
+
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| **React** | 18 | UI library |
-| **Vite** | 5.0+ | Build tool |
-| **Tailwind CSS** | 4.0+ | Styling |
-| **Framer Motion** | 10.0+ | Animations |
-| **Lucide React** | Latest | Icons |
-| **TypeScript** | 5.0+ | Type safety |
+| React | 18 | UI library |
+| Vite | 5.0+ | Build tool |
+| Tailwind CSS | 4.0+ | Styling |
+| Framer Motion | 10.0+ | Animations |
+| Lucide React | Latest | Icons |
+| TypeScript | 5.0+ | Type safety |
 
 ### Deployment
+
 | Service | Purpose |
 |---------|---------|
-| **Render** | Backend hosting (free tier) |
-| **Netlify** | Frontend hosting (free tier) |
-
----
-
-## 📸 Screenshots
-
-### Dashboard - Standby Mode
-![Dashboard Standby](screenshots/dashboard-standby.png)
-*The main dashboard before analysis - ready for PDF upload*
-
-### Dashboard - Agent Processing
-![Agent Processing](screenshots/agent-processing.png)
-*Real-time multi-agent collaboration with status updates*
-
-### Dashboard - Results
-![Results View](screenshots/results-view.png)
-*Complete analysis results with eligibility status, scholarship summary, and action plan*
-
-### Eligibility Status Banner
-![Eligibility Status](screenshots/eligibility-status.png)
-*Clear visual indication of eligibility status (Eligible/Partially Eligible/Not Eligible)*
-
-### Action Plan Checklist
-![Action Plan](screenshots/action-plan.png)
-*Interactive checklist with priorities, deadlines, and completion tracking*
-
-### Mobile Responsive
-![Mobile View](screenshots/mobile-view.png)
-*Fully responsive design that works on all devices*
+| Render | Backend hosting (free tier) |
+| Netlify | Frontend hosting (free tier) |
 
 ---
 
@@ -277,9 +187,9 @@ npm run dev
 
 ### Access the Application
 
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8000
+- API Documentation: http://localhost:8000/docs
 
 ---
 
@@ -312,34 +222,19 @@ curl -X POST "http://localhost:8000/api/v1/analyze" \
 {
   "analysis": {
     "document_type": "admission",
-    "scholarship_name": "First-Year Undergraduate Degree Programme 2025-2026",
-    "deadline": "Thursday, 05-June-2025",
-    "mandatory_requirements": [
-      "12th pass or equivalent",
-      "Entrance exam required"
-    ],
-    "special_categories": [
-      "Sindhi Minority students",
-      "In-house students"
-    ],
-    "alternative_admission_paths": [
-      "MHCET scores",
-      "H-CET exam"
-    ]
+    "scholarship_name": "First-Year Undergraduate Programme",
+    "deadline": "June 05, 2025",
+    "mandatory_requirements": ["12th pass", "Entrance exam required"],
+    "special_categories": ["Sindhi Minority", "In-house students"],
+    "alternative_admission_paths": ["MHCET", "H-CET"]
   },
   "eligibility": {
     "status": "Partially Eligible",
     "score": 65,
-    "reasons": [
-      "Meets academic requirements",
-      "Entrance exam information missing"
-    ]
+    "reasons": ["Meets academic requirements", "Entrance exam info missing"]
   },
   "action_plan": {
-    "immediate_actions": [
-      "Register for entrance exam",
-      "Gather required documents"
-    ],
+    "immediate_actions": ["Register for entrance exam"],
     "checklist": [],
     "missing_documents": [],
     "timeline": {}
@@ -351,26 +246,26 @@ curl -X POST "http://localhost:8000/api/v1/analyze" \
 
 ## 🚢 Deployment
 
-### Deploy Backend to Render
+### Backend (Render)
 
 1. Create account at [Render](https://render.com)
 2. Click "New +" → "Web Service"
-3. Connect your GitHub repository
-4. Use these settings:
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-   - **Environment Variables**: Add `GEMINI_API_KEY` and `ALLOWED_ORIGINS`
+3. Connect GitHub repository
+4. Settings:
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - Add environment variables: `GEMINI_API_KEY`, `ALLOWED_ORIGINS`
 5. Click "Create Web Service"
 
-### Deploy Frontend to Netlify
+### Frontend (Netlify)
 
 1. Create account at [Netlify](https://netlify.com)
 2. Click "Add new site" → "Import an existing project"
-3. Connect your GitHub repository
-4. Build settings (auto-detected):
-   - **Build Command**: `npm run build`
-   - **Publish Directory**: `dist`
-   - **Environment Variables**: Add `VITE_API_BASE_URL`
+3. Connect GitHub repository
+4. Settings:
+   - Build Command: `npm run build`
+   - Publish Directory: `dist`
+   - Add environment variable: `VITE_API_BASE_URL`
 5. Click "Deploy site"
 
 ---
@@ -381,64 +276,23 @@ curl -X POST "http://localhost:8000/api/v1/analyze" \
 ai-admission-scholarship-navigator/
 ├── backend/
 │   ├── app/
-│   │   ├── agents/
-│   │   │   ├── __init__.py
-│   │   │   ├── adk_document_agent.py
-│   │   │   ├── adk_eligibility_agent.py
-│   │   │   └── adk_action_agent.py
-│   │   ├── api/
-│   │   │   ├── __init__.py
-│   │   │   └── routes.py
-│   │   ├── models/
-│   │   │   ├── __init__.py
-│   │   │   └── schemas.py
-│   │   ├── orchestrator/
-│   │   │   ├── __init__.py
-│   │   │   └── adk_orchestrator.py
-│   │   ├── services/
-│   │   │   ├── __init__.py
-│   │   │   └── gemini_service.py
-│   │   ├── utils/
-│   │   │   ├── __init__.py
-│   │   │   ├── logger.py
-│   │   │   ├── errors.py
-│   │   │   └── pdf_processor.py
-│   │   └── main.py
-│   ├── tests/
-│   │   ├── __init__.py
-│   │   ├── test_api.py
-│   │   └── test_agents.py
+│   │   ├── agents/          # ADK agents
+│   │   ├── api/             # FastAPI routes
+│   │   ├── models/          # Pydantic schemas
+│   │   ├── orchestrator/    # Agent orchestration
+│   │   ├── services/        # Gemini service
+│   │   └── utils/           # Utilities
+│   ├── tests/               # Unit tests
 │   ├── requirements.txt
 │   ├── Dockerfile
-│   ├── .env.example
-│   └── README.md
+│   └── .env.example
 ├── frontend/
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── Dashboard.tsx
-│   │   │   └── Hero.tsx
-│   │   ├── services/
-│   │   │   └── api.ts
-│   │   ├── types/
-│   │   │   └── index.ts
-│   │   ├── App.tsx
-│   │   └── main.tsx
+│   │   ├── components/      # React components
+│   │   ├── services/        # API services
+│   │   └── types/           # TypeScript types
 │   ├── package.json
-│   ├── vite.config.ts
-│   ├── tailwind.config.js
-│   ├── netlify.toml
-│   └── Dockerfile
-├── .github/
-│   └── workflows/
-│       ├── deploy-backend.yml
-│       └── deploy-frontend.yml
-├── screenshots/
-│   ├── dashboard-standby.png
-│   ├── agent-processing.png
-│   ├── results-view.png
-│   ├── eligibility-status.png
-│   ├── action-plan.png
-│   └── mobile-view.png
+│   └── vite.config.ts
 ├── .gitignore
 ├── LICENSE
 └── README.md
@@ -448,21 +302,18 @@ ai-admission-scholarship-navigator/
 
 ## 🤝 Contributing
 
-We welcome contributions! Please follow these steps:
-
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-### Development Guidelines
+### Guidelines
 
-- Follow PEP 8 for Python code
-- Use ESLint and Prettier for frontend code
+- Follow PEP 8 for Python
+- Use ESLint and Prettier for frontend
 - Write tests for new features
-- Update documentation for API changes
-- Keep code modular and well-commented
+- Update documentation
 
 ---
 
@@ -474,23 +325,26 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Google ADK** - For providing the agent framework
-- **Google Gemini** - For the powerful AI capabilities
-- **FastAPI** - For the excellent web framework
-- **React** - For the beautiful frontend library
-- **Tailwind CSS** - For the amazing styling framework
-- **Google Cloud & Gen AI Academy** - For the "Meet the Builders" initiative
+- Google ADK - Agent framework
+- Google Gemini - AI capabilities
+- FastAPI - Web framework
+- React - UI library
+- Google Cloud & Gen AI Academy - "Meet the Builders" initiative
 
 ---
 
 ## 👨‍💻 Made By
 
+### Yug Agrawal
+
+[![GitHub](https://img.shields.io/badge/GitHub-YUG634-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/YUG634)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Yug%20Agrawal-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://linkedin.com/in/yug-agrawal)
+[![Email](https://img.shields.io/badge/Email-yugagrawal634%40gmail.com-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:yugagrawal634@gmail.com)
+
+---
+
 <div align="center">
-  <h3>
-    <a href="https://github.com/YUG634">
-      <img src="https://img.shields.io/badge/GitHub-YUG634-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/>
-    </a>
-  </h3>
   <p>Built with ❤️ for the Google Cloud & Gen AI Academy "Meet the Builders" initiative</p>
-  <img src="https://img.shields.io/badge/Google_Cloud-4285F4?style=for-the-badge&logo=google&logoColor=white" alt="Google Cloud"/>
 </div>
+```
+
