@@ -7,7 +7,6 @@ class ADKDocumentAgent:
     def __init__(self):
         self.gemini = GeminiService()
         self.agent = self._create_agent()
-        # Fix: Use 'func' instead of '_func'
         self.tool_func = self.agent.tools[0].func
     
     def _create_agent(self):
@@ -15,13 +14,13 @@ class ADKDocumentAgent:
             prompt = f"""
             You are an expert document analyst. Analyze this document and classify it properly.
 
-            CRITICAL CLASSIFICATION RULES:
-            1. Determine if this is a SCHOLARSHIP notification or ADMISSION notification
-            2. For ADMISSION notifications, eligibility is more flexible - special categories are OPTIONAL
-            3. For SCHOLARSHIP notifications, eligibility criteria are usually MANDATORY
-
             Document text:
             {text[:8000]}
+
+            CRITICAL: Look for sections like "List of Required Documents", "Documents Required", 
+            "Checklist", or numbered/bulleted lists of documents. Extract each document individually.
+
+            For checkbox lists (like ☐ 1. 10th Marksheet), extract each item separately.
 
             Return ONLY valid JSON with this EXACT structure:
             {{
@@ -29,49 +28,46 @@ class ADKDocumentAgent:
                 "scholarship_name": "Full name of the program/scholarship",
                 "deadline": "Application deadline",
                 "mandatory_requirements": [
-                    "Requirements that ALL applicants MUST meet",
-                    "Example: Must have passed 12th standard",
-                    "Example: Must have appeared for entrance exam"
+                    "Requirements that ALL applicants MUST meet"
                 ],
                 "special_categories": [
-                    "OPTIONAL categories that provide benefits",
-                    "Example: Sindhi Minority students",
-                    "Example: In-house students of specific colleges",
-                    "Example: SC/ST/OBC/EWS categories"
+                    "OPTIONAL categories that provide benefits"
                 ],
                 "alternative_admission_paths": [
-                    "Different ways to qualify",
-                    "Example: MHCET scores",
-                    "Example: H-CET exam",
-                    "Example: National level entrance exams"
+                    "Different ways to qualify"
                 ],
                 "required_documents": [
-                    "List of required documents",
-                    "Example: 10th marksheet",
-                    "Example: 12th marksheet",
-                    "Example: Caste certificate"
+                    "List each document separately with full name",
+                    "Example: 10th Marksheet",
+                    "Example: 12th Marksheet",
+                    "Example: Aadhaar Card Copy"
                 ],
                 "important_instructions": [
-                    "Important application instructions",
-                    "Example: Apply online by deadline",
-                    "Example: Document verification process"
+                    "Important application instructions"
                 ]
             }}
 
-            RULES FOR CLASSIFICATION:
-            - For ADMISSION notifications: special_categories are OPTIONAL, not mandatory
-            - For SCHOLARSHIP notifications: special_categories are usually MANDATORY
-            - mandatory_requirements should only include things EVERY applicant needs
-            - If you're unsure, put it in mandatory_requirements
+            RULES FOR EXTRACTING REQUIRED DOCUMENTS:
+            1. Look for sections with titles like: "LIST OF REQUIRED DOCUMENTS", "Documents Required", "Checklist"
+            2. Extract each document individually, including:
+               - 10th Marksheet, 12th Marksheet
+               - Leaving Certificate, Transfer Certificate, Migration Certificate
+               - Aadhaar Card, ID Proof
+               - Caste Certificate, Income Certificate, Domicile Certificate
+               - Entrance Exam Certificate, Scorecards
+               - Photographs, Signature
+               - Any other specific documents mentioned
+            3. For checkbox lists (☐, ✓, etc.), extract each item
+            4. Include ALL documents mentioned in the document
             """
             return self.gemini.generate_structured_response(prompt)
         
         return Agent(
             name="DocumentAnalysisAgent",
-            model="gemini-2.5-flash",
+            model="gemini-2.0-flash",
             instruction="""You are a specialized agent for analyzing scholarship and admission documents.
             Your primary responsibility is to extract structured information and properly classify documents.
-            Always distinguish between MANDATORY requirements and OPTIONAL special categories.
-            Never treat special categories as mandatory requirements unless explicitly stated.""",
+            Always extract specific document names from lists, especially checkbox lists.
+            Include ALL documents mentioned in the document.""",
             tools=[FunctionTool(extract_scholarship_info)]
         )
