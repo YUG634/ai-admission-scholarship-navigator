@@ -1,6 +1,3 @@
-
-
-```markdown
 # 🎓 AI Admission & Scholarship Navigator
 
 <div align="center">
@@ -18,7 +15,7 @@
 
 ## 📖 Overview
 
-**AI Admission & Scholarship Navigator** is a multi-agent AI system that helps students understand complex admission notifications and scholarship PDFs. It uses Google ADK and Gemini 2.5 Flash to transform lengthy documents into personalized, actionable plans.
+**AI Admission & Scholarship Navigator** is a multi-agent AI system that helps students understand complex admission notifications and scholarship PDFs. It uses Google ADK and Gemini 2.5 Flash to transform confusing documents into personalized, actionable insights.
 
 ### The Problem
 
@@ -346,5 +343,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <div align="center">
   <p>Built with ❤️ for the Google Cloud & Gen AI Academy "Meet the Builders" initiative</p>
 </div>
-```
-
