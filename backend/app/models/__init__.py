@@ -1,7 +1,6 @@
 from .schemas import (
     StudentProfile,
     Category,
-    DocumentType,
     DocumentAnalysis,
     EligibilityResult,
     ActionItem,
@@ -12,7 +11,6 @@ from .schemas import (
 __all__ = [
     "StudentProfile",
     "Category",
-    "DocumentType",
     "DocumentAnalysis",
     "EligibilityResult",
     "ActionItem",
