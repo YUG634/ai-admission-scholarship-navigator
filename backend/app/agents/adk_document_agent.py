@@ -70,7 +70,7 @@ class ADKDocumentAgent:
         
         return Agent(
             name="DocumentAnalysisAgent",
-            model="gemini-2.0-flash",  # ✅ Changed
+            model="gemini-2.5-flash",
             instruction="Extract structured information from documents.",
             tools=[FunctionTool(extract_scholarship_info)]
         )

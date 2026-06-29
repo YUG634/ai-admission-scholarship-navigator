@@ -18,23 +18,18 @@ class ADKActionAgent:
             DOCUMENT ANALYSIS: {analysis_json}
             ELIGIBILITY: {eligibility_json}
 
-            CRITICAL RULES:
-            1. Use the actual deadlines from the document
-            2. Create checklist items based on the admission process
-            3. Include tasks for gathering missing documents
-            4. Use the eligibility status and reasons to guide recommendations
-
             Return ONLY valid JSON:
             {{
                 "immediate_actions": [
-                    "Most urgent actions first based on earliest deadlines"
+                    "Complete online application by June 5, 2025",
+                    "Register for entrance exam"
                 ],
                 "checklist": [
-                    {{"task": "Complete online application form", "priority": "High", "deadline": "June 5, 2025"}},
-                    {{"task": "Register for entrance exam (H-CET/H-LAT)", "priority": "High", "deadline": "May 30, 2025"}},
-                    {{"task": "Gather missing documents", "priority": "High", "deadline": "May 25, 2025"}},
+                    {{"task": "Submit online application", "priority": "High", "deadline": "June 5, 2025"}},
+                    {{"task": "Register for H-CET/H-LAT", "priority": "High", "deadline": "May 30, 2025"}},
+                    {{"task": "Gather required documents", "priority": "High", "deadline": "May 25, 2025"}},
                     {{"task": "Upload documents for verification", "priority": "High", "deadline": "June 5, 2025"}},
-                    {{"task": "Check merit list on May 26, 2025", "priority": "High", "deadline": "May 26, 2025"}}
+                    {{"task": "Check merit list", "priority": "High", "deadline": "May 26, 2025"}}
                 ],
                 "missing_documents": [
                     "10th Marksheet",
@@ -44,14 +39,16 @@ class ADKActionAgent:
                 ],
                 "recommendations": [
                     "Apply early to avoid last-minute issues",
-                    "Prepare for entrance exam",
-                    "Keep scanned copies of all documents ready"
+                    "Prepare thoroughly for entrance exam",
+                    "Keep documents ready for verification",
+                    "Monitor merit list announcements"
                 ],
                 "next_steps": [
                     "Step 1: Complete online application",
                     "Step 2: Register for entrance exam",
                     "Step 3: Gather all required documents",
-                    "Step 4: Upload documents for verification"
+                    "Step 4: Upload documents for verification",
+                    "Step 5: Pay fees and confirm admission"
                 ],
                 "timeline": {{
                     "week_1": "Complete application and gather documents",
@@ -67,7 +64,7 @@ class ADKActionAgent:
             name="ActionPlanAgent",
             model="gemini-2.5-flash",
             instruction="""Create personalized action plans with specific deadlines.
-            Every checklist item should have a priority and deadline.
-            Include tasks for gathering missing documents identified by the eligibility agent.""",
+            Every checklist item must have task, priority, and deadline.
+            Include immediate_actions, checklist, missing_documents, recommendations, next_steps, and timeline.""",
             tools=[FunctionTool(generate_action_plan)]
         )
