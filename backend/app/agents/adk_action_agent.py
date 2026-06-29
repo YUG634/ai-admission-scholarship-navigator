@@ -18,36 +18,37 @@ class ADKActionAgent:
             DOCUMENT ANALYSIS: {analysis_json}
             ELIGIBILITY: {eligibility_json}
 
-            CRITICAL RULES:
-            1. Use the actual deadlines from the document
-            2. Create checklist items for each step in the admission process
-            3. Include tasks for gathering missing documents
-            4. Use the eligibility status and reasons to guide recommendations
-
             Return ONLY valid JSON:
             {{
                 "immediate_actions": [
-                    "Most urgent actions first based on earliest deadlines"
+                    "Complete online application by June 5, 2025",
+                    "Register for entrance exam"
                 ],
                 "checklist": [
-                    {{"task": "Task description", "priority": "High/Medium/Low", "deadline": "Actual date from document"}}
+                    {{"task": "Submit online application", "priority": "High", "deadline": "June 5, 2025"}},
+                    {{"task": "Register for H-CET/H-LAT", "priority": "High", "deadline": "May 30, 2025"}},
+                    {{"task": "Gather required documents", "priority": "High", "deadline": "May 25, 2025"}}
                 ],
                 "missing_documents": [
-                    "Documents the student needs to gather"
+                    "10th Marksheet",
+                    "12th Marksheet",
+                    "Aadhaar Card Copy",
+                    "Entrance exam certificate"
                 ],
                 "recommendations": [
-                    "Strategic advice for successful application"
+                    "Apply early to avoid last-minute issues",
+                    "Prepare for entrance exam"
                 ],
                 "next_steps": [
-                    "Step 1",
-                    "Step 2",
-                    "Step 3"
+                    "Step 1: Complete online application",
+                    "Step 2: Gather documents",
+                    "Step 3: Appear for entrance exam"
                 ],
                 "timeline": {{
-                    "week_1": "Tasks for week 1",
-                    "week_2": "Tasks for week 2",
-                    "week_3": "Tasks for week 3",
-                    "week_4": "Tasks for week 4"
+                    "week_1": "Complete application and gather documents",
+                    "week_2": "Prepare for entrance exam",
+                    "week_3": "Submit documents for verification",
+                    "week_4": "Pay fees and confirm admission"
                 }}
             }}
             """
@@ -55,9 +56,7 @@ class ADKActionAgent:
         
         return Agent(
             name="ActionPlanAgent",
-            model="gemini-2.5-flash",
-            instruction="""Create action plans using the actual deadlines from the document.
-            Every checklist item should have a specific deadline from the document.
-            Include tasks for gathering missing documents identified by the eligibility agent.""",
+            model="gemini-2.0-flash",  # ✅ Changed
+            instruction="Create personalized action plans with deadlines.",
             tools=[FunctionTool(generate_action_plan)]
         )
