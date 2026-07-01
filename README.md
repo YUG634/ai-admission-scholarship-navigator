@@ -220,9 +220,7 @@ Our system uses **3 specialized AI agents** powered by Google ADK and Gemini 2.5
 ![Action Plan](screenshots/action-plan.png)
 *Interactive checklist with priorities, deadlines, and completion tracking*
 
-### Mobile Responsive
-![Mobile View](screenshots/mobile-view.png)
-*Fully responsive design that works on all devices*
+
 
 ---
 
