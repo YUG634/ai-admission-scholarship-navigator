@@ -3,6 +3,13 @@ from typing import List, Optional, Dict, Any
 from enum import Enum
 from datetime import datetime
 
+# ✅ ADD THIS
+class DocumentType(str, Enum):
+    SCHOLARSHIP = "scholarship"
+    ADMISSION = "admission"
+    BOTH = "both"
+    UNKNOWN = "unknown"
+
 class Category(str, Enum):
     GENERAL = "General"
     OBC = "OBC"
@@ -21,17 +28,13 @@ class StudentProfile(BaseModel):
 
 class DocumentAnalysis(BaseModel):
     document_type: str = "unknown"
-    scholarship_name: str = ""  # ✅ Default empty string
+    scholarship_name: str = ""
     deadline: str = ""
     mandatory_requirements: List[str] = Field(default_factory=list)
     special_categories: List[str] = Field(default_factory=list)
     alternative_admission_paths: List[str] = Field(default_factory=list)
     required_documents: List[str] = Field(default_factory=list)
     important_instructions: List[str] = Field(default_factory=list)
-    
-    @validator('scholarship_name', pre=True)
-    def handle_none(cls, v):
-        return v if v is not None else ""
 
 class EligibilityResult(BaseModel):
     status: str = "Not Eligible"
@@ -57,8 +60,20 @@ class ActionPlan(BaseModel):
     next_steps: List[str] = Field(default_factory=list)
     timeline: Dict[str, str] = Field(default_factory=dict)
 
+class ComparisonResult(BaseModel):
+    student_profile_matches: bool = False
+    eligibility_score: float = 0
+    document_completeness: float = 0
+    missing_requirements: List[str] = Field(default_factory=list)
+    strengths: List[str] = Field(default_factory=list)
+    weaknesses: List[str] = Field(default_factory=list)
+    overall_assessment: str = ""
+
 class AnalysisResponse(BaseModel):
     analysis: DocumentAnalysis
     eligibility: EligibilityResult
     action_plan: ActionPlan
+    document_type: DocumentType = DocumentType.UNKNOWN
+    comparison: Optional[ComparisonResult] = None
     processing_time_ms: Optional[float] = None
+    message: Optional[str] = None
