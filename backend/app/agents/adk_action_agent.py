@@ -12,48 +12,31 @@ class ADKActionAgent:
     def _create_agent(self):
         def generate_action_plan(profile_json: str, analysis_json: str, eligibility_json: str) -> dict:
             prompt = f"""
-            You are a strategic advisor. Create a personalized action plan based on the student's profile, document analysis, and eligibility results.
+            You are an action planner. Generate specific, actionable tasks.
 
-            STUDENT PROFILE:
-            {profile_json}
+            STUDENT: {profile_json}
+            DOCUMENT: {analysis_json}
+            ELIGIBILITY: {eligibility_json}
 
-            DOCUMENT ANALYSIS:
-            {analysis_json}
+            RULES:
+            1. Each task must be specific and actionable
+            2. Each task must trace to a missing requirement or document
+            3. Use deadlines from the document
+            4. NO generic advice like "Research", "Work hard", "Explore options"
 
-            ELIGIBILITY RESULTS:
-            {eligibility_json}
+            BAD: "Research opportunities"  → GOOD: "Apply for B.Sc. Web Technologies by June 5"
+            BAD: "Prepare for exam"       → GOOD: "Register for H-CET via http://hsncu.epravesh.com/"
 
-            CRITICAL RULES:
-            1. Use ONLY information from the provided data - NO hardcoded dates, exams, or tasks
-            2. The document analysis contains the actual deadlines - use them
-            3. The eligibility results show what's missing - address those gaps
-            4. Generate tasks that are SPECIFIC to this student and document
-
-            Return ONLY valid JSON:
+            Return:
             {{
-                "immediate_actions": [
-                    "Most urgent actions based on document deadlines and student's situation"
-                ],
+                "immediate_actions": ["Specific action 1", "Specific action 2"],
                 "checklist": [
-                    {{"task": "Specific task based on document", "priority": "High", "deadline": "Date from document"}}
+                    {{"task": "Specific action", "priority": "High", "deadline": "Date from document"}}
                 ],
-                "missing_documents": [
-                    "Documents from eligibility results that the student needs"
-                ],
-                "recommendations": [
-                    "Strategic advice based on student's eligibility status"
-                ],
-                "next_steps": [
-                    "Step 1",
-                    "Step 2",
-                    "Step 3"
-                ],
-                "timeline": {{
-                    "week_1": "Tasks for week 1 based on document dates",
-                    "week_2": "Tasks for week 2",
-                    "week_3": "Tasks for week 3",
-                    "week_4": "Tasks for week 4"
-                }}
+                "missing_documents": ["Document 1", "Document 2"],
+                "recommendations": ["Actionable recommendation 1"],
+                "next_steps": ["Step 1", "Step 2"],
+                "timeline": {{"week_1": "Tasks", "week_2": "Tasks"}}
             }}
             """
             return self.gemini.generate_structured_response(prompt)
@@ -61,8 +44,6 @@ class ADKActionAgent:
         return Agent(
             name="ActionPlanAgent",
             model="gemini-2.5-flash",
-            instruction="""Generate action plans dynamically from student profile, document analysis, and eligibility results.
-            NEVER use hardcoded dates, exams, or tasks.
-            Everything must come from the provided data.""",
+            instruction="""Generate specific, actionable tasks only. No generic advice. Every task must trace to a missing requirement.""",
             tools=[FunctionTool(generate_action_plan)]
         )

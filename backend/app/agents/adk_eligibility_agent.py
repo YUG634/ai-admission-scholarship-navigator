@@ -12,7 +12,7 @@ class ADKEligibilityAgent:
     def _create_agent(self):
         def check_eligibility(profile_json: str, analysis_json: str) -> dict:
             prompt = f"""
-            You are an eligibility checker. Compare the student profile against the requirements.
+            You are an eligibility evaluator. Determine eligibility based ONLY on extracted facts.
 
             STUDENT PROFILE:
             {profile_json}
@@ -20,33 +20,24 @@ class ADKEligibilityAgent:
             DOCUMENT ANALYSIS:
             {analysis_json}
 
-            CRITICAL RULES:
-            1. **NEVER treat special_categories as mandatory requirements**
-            2. **Only mandatory_requirements should cause rejection**
-            3. **If mandatory requirements are met but information is missing → Partially Eligible**
-            4. **Only use Not Eligible when mandatory requirements are clearly violated**
+            RULES:
+            1. status = "Eligible" if ALL mandatory requirements are met
+            2. status = "Partially Eligible" if mandatory requirements met but info missing
+            3. status = "Not Eligible" ONLY if a mandatory requirement is clearly violated
+            4. NEVER reject for: minority status, quota, special categories, missing documents
+            5. Missing documents = PARTIALLY ELIGIBLE, NOT Not Eligible
 
-            For missing_documents:
-            - Look at required_documents and compare with student profile
-            - Only include documents that are actually required
-            - For General category students, DO NOT include Caste Certificate
-
-            Return ONLY valid JSON:
+            Return:
             {{
                 "status": "Eligible" or "Partially Eligible" or "Not Eligible",
                 "score": 0-100,
                 "reasons": [
-                    "Clear explanation of eligibility status"
+                    "Requirement met: X",
+                    "Missing: Y"
                 ],
-                "matching_criteria": [
-                    "Mandatory requirements the student meets"
-                ],
-                "missing_criteria": [
-                    "Requirements not met or information missing"
-                ],
-                "missing_documents": [
-                    "Documents the student needs to gather"
-                ],
+                "matching_criteria": ["Criteria met"],
+                "missing_criteria": ["Criteria missing"],
+                "missing_documents": ["Documents to gather"],
                 "mandatory_met": true/false,
                 "special_category_eligible": true/false,
                 "has_alternative_path": true/false
@@ -57,8 +48,6 @@ class ADKEligibilityAgent:
         return Agent(
             name="EligibilityAgent",
             model="gemini-2.5-flash",
-            instruction="""Compare student profiles against mandatory requirements only.
-            NEVER treat special_categories as mandatory.
-            Always include missing_documents, mandatory_met, special_category_eligible, and has_alternative_path.""",
+            instruction="""Evaluate eligibility strictly. Never reject for optional categories. Missing info = Partially Eligible.""",
             tools=[FunctionTool(check_eligibility)]
         )

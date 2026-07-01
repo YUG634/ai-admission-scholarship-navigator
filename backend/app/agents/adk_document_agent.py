@@ -2,6 +2,7 @@ from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
 from app.services.gemini_service import GeminiService
 import json
+import re
 
 class ADKDocumentAgent:
     def __init__(self):
@@ -11,52 +12,41 @@ class ADKDocumentAgent:
     
     def _create_agent(self):
         def extract_scholarship_info(text: str) -> dict:
+            # ✅ First, try to extract documents using regex (no API call)
+            documents = self._extract_documents_from_text(text)
+            
+            # ✅ Build prompt with document extraction emphasis
             prompt = f"""
-            You are an expert document analyst. Analyze this document and extract structured information.
+            You are a document extractor. Extract ALL information from this document.
 
             Document text:
-            {text[:10000]}
+            {text[:8000]}
 
-            CRITICAL: Classify EVERY piece of information into the correct category:
-
-            1. **mandatory_requirements**: Requirements that ALL applicants MUST meet.
-               - Examples: "Must have passed 12th standard", "Must be an Indian citizen", "Must have appeared for entrance exam"
-               - These are NOT optional - every applicant needs these
-
-            2. **special_categories**: OPTIONAL categories that provide benefits or special consideration.
-               - Examples: "Sindhi Minority students", "In-house students", "SC/ST/OBC/EWS categories"
-               - These are benefits, NOT requirements
-
-            3. **alternative_admission_paths**: Different ways to qualify for admission.
-               - Examples: "MHCET scores", "H-CET exam", "National level entrance exams", "Direct admission"
-
-            4. **required_documents**: Documents needed for application.
-               - Examples: "10th Marksheet", "12th Marksheet", "Aadhaar Card", "Caste Certificate"
-               - Extract each document separately
-
-            5. **important_instructions**: Key application instructions.
-               - Examples: "Apply online by deadline", "Document verification required"
+            CRITICAL RULES FOR DOCUMENTS:
+            1. Look for "LIST OF REQUIRED DOCUMENTS", "Documents Required", "Checklist"
+            2. Extract EACH document as a SEPARATE string
+            3. Example: If you see "☐ 1. 10th Marksheet", return "10th Marksheet"
+            4. DO NOT summarize. DO NOT combine. Return each document individually.
+            5. If you find documents in the text, include them ALL.
 
             Return ONLY valid JSON:
             {{
-                "document_type": "scholarship" or "admission" or "unknown",
-                "scholarship_name": "Full name of the program/scholarship",
-                "deadline": "Application deadline",
+                "document_type": "admission",
+                "scholarship_name": "Name from document",
+                "deadline": "Deadline from document",
                 "mandatory_requirements": [
-                    "Requirement 1",
-                    "Requirement 2"
+                    "Each requirement as separate string"
                 ],
                 "special_categories": [
-                    "Category 1",
-                    "Category 2"
+                    "Each category as separate string"
                 ],
                 "alternative_admission_paths": [
-                    "Path 1",
-                    "Path 2"
+                    "Each path as separate string"
                 ],
                 "required_documents": [
                     "Document 1",
-                    "Document 2"
+                    "Document 2",
+                    "Document 3"
                 ],
                 "important_instructions": [
                     "Instruction 1",
@@ -64,12 +54,56 @@ class ADKDocumentAgent:
                 ]
             }}
             """
-            return self.gemini.generate_structured_response(prompt)
+            
+            result = self.gemini.generate_structured_response(prompt)
+            
+            # ✅ If Gemini didn't extract documents, use regex extraction as fallback
+            if not result.get("required_documents") or len(result.get("required_documents", [])) < 2:
+                result["required_documents"] = documents
+            
+            return result
         
         return Agent(
             name="DocumentAnalysisAgent",
             model="gemini-2.5-flash",
-            instruction="""Extract structured information and classify it into mandatory_requirements, special_categories, alternative_admission_paths, required_documents, and important_instructions.
-            NEVER mix these categories. special_categories are OPTIONAL, not mandatory.""",
+            instruction="""Extract ALL documents individually. NEVER summarize. Each document must be a separate string.""",
             tools=[FunctionTool(extract_scholarship_info)]
         )
+    
+    def _extract_documents_from_text(self, text: str) -> list:
+        """Extract documents using regex - reliable fallback"""
+        documents = []
+        
+        # Look for document list section
+        patterns = [
+            r'(?:LIST OF REQUIRED DOCUMENTS|Documents Required|Checklist|Enclosures)[\s:]*([^\n]*(?:\n[^\n]+)*?)(?:\n\n|\Z)',
+            r'(?:Required Documents|Documents to be attached)[\s:]*([^\n]*(?:\n[^\n]+)*?)(?:\n\n|\Z)',
+        ]
+        
+        for pattern in patterns:
+            match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
+            if match:
+                section = match.group(1)
+                # Extract numbered or bulleted items
+                items = re.findall(r'(?:☐|•|-|\*|\d+[\.\)])\s*([^\n]+)', section)
+                if items:
+                    documents = [doc.strip() for doc in items if len(doc.strip()) > 5]
+                    break
+        
+        # If no structured list found, look for document-like patterns
+        if not documents:
+            doc_patterns = [
+                r'(\d+[\.\)]\s*)?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s*(?:Marksheet|Certificate|Card|Copy|Form|Letter|ID|Proof))',
+                r'([A-Z][a-z]+\s+[A-Z][a-z]+\s+(?:Certificate|Card|Marksheet))',
+            ]
+            for pattern in doc_patterns:
+                matches = re.findall(pattern, text, re.IGNORECASE)
+                for match in matches:
+                    doc_name = match[-1] if isinstance(match, tuple) else match
+                    if doc_name.strip() and len(doc_name.strip()) > 5:
+                        documents.append(doc_name.strip())
+                if documents:
+                    break
+        
+        # Return unique documents
+        return list(dict.fromkeys(documents))

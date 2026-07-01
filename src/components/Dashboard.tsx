@@ -772,21 +772,29 @@ export default function Dashboard() {
                 {/* 4d. REQUIRED VS MISSING DOCUMENTS CARDS */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   
-                  {/* Required */}
-                  <div className="bg-zinc-900/70 border border-white/5 rounded-3xl p-6 backdrop-blur-md shadow-xl space-y-4">
-                    <div className="flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-accent-blue" />
-                      <h4 className="font-display font-bold text-md text-white">Required Documents</h4>
-                    </div>
-                    <ul className="space-y-2 pt-2">
-                      {results.analysis?.required_documents.map((doc, idx) => (
-                        <li key={idx} className="text-xs font-medium text-zinc-300 bg-zinc-950 p-2.5 rounded-xl border border-zinc-850 flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-accent-blue" />
-                          <span className="truncate">{doc}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                  {/* Required Documents Card */}
+<div className="bg-zinc-900/70 border border-white/5 rounded-3xl p-6 md:p-8 backdrop-blur-md shadow-xl">
+  <div className="flex items-center gap-2 mb-4">
+    <FileText className="w-5 h-5 text-accent-blue" />
+    <h4 className="font-display font-bold text-md text-white">Required Documents</h4>
+    <span className="ml-auto text-xs text-zinc-500">
+      {results.analysis?.required_documents?.length || 0} items
+    </span>
+  </div>
+  
+  <ul className="space-y-2">
+    {results.analysis?.required_documents && results.analysis.required_documents.length > 0 ? (
+      results.analysis.required_documents.map((doc, idx) => (
+        <li key={idx} className="text-sm text-zinc-300 flex items-start gap-2 bg-zinc-950/50 p-2 rounded-xl border border-zinc-850">
+          <span className="text-accent-blue mt-0.5 font-bold">▪</span>
+          <span>{doc}</span>
+        </li>
+      ))
+    ) : (
+      <li className="text-sm text-zinc-500">No specific documents listed.</li>
+    )}
+  </ul>
+</div>
 
                   {/* Missing */}
                   <div className="bg-zinc-900/70 border border-white/5 rounded-3xl p-6 backdrop-blur-md shadow-xl space-y-4">
