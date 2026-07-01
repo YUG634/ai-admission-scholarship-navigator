@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict, Any
 from enum import Enum
 from datetime import datetime
@@ -20,60 +20,33 @@ class StudentProfile(BaseModel):
     cgpa: Optional[float] = None
 
 class DocumentAnalysis(BaseModel):
-    """Extracted information from scholarship/admission document"""
-    document_type: str = "unknown"  # "scholarship", "admission", "unknown"
-    scholarship_name: str = ""
+    document_type: str = "unknown"
+    scholarship_name: str = ""  # ✅ Default empty string
     deadline: str = ""
-    # ✅ NEW: Separate fields for different types of requirements
-    mandatory_requirements: List[str] = Field(
-        default_factory=list,
-        description="Requirements that ALL applicants MUST meet"
-    )
-    special_categories: List[str] = Field(
-        default_factory=list,
-        description="OPTIONAL categories that provide benefits"
-    )
-    alternative_admission_paths: List[str] = Field(
-        default_factory=list,
-        description="Different ways to qualify for admission"
-    )
-    required_documents: List[str] = Field(
-        default_factory=list,
-        description="Documents required for application"
-    )
-    important_instructions: List[str] = Field(
-        default_factory=list,
-        description="Important application instructions"
-    )
+    mandatory_requirements: List[str] = Field(default_factory=list)
+    special_categories: List[str] = Field(default_factory=list)
+    alternative_admission_paths: List[str] = Field(default_factory=list)
+    required_documents: List[str] = Field(default_factory=list)
+    important_instructions: List[str] = Field(default_factory=list)
+    
+    @validator('scholarship_name', pre=True)
+    def handle_none(cls, v):
+        return v if v is not None else ""
 
 class EligibilityResult(BaseModel):
-    """Eligibility check results"""
-    status: str = "Not Eligible"  # "Eligible", "Partially Eligible", "Not Eligible"
+    status: str = "Not Eligible"
     score: float = 0
     reasons: List[str] = Field(default_factory=list)
     matching_criteria: List[str] = Field(default_factory=list)
     missing_criteria: List[str] = Field(default_factory=list)
-    # ✅ NEW: Additional fields for better eligibility tracking
-    missing_documents: List[str] = Field(
-        default_factory=list,
-        description="Documents the student needs to gather"
-    )
-    mandatory_met: bool = Field(
-        default=False,
-        description="Whether all mandatory requirements are met"
-    )
-    special_category_eligible: bool = Field(
-        default=False,
-        description="Whether student qualifies for any special category"
-    )
-    has_alternative_path: bool = Field(
-        default=False,
-        description="Whether alternative admission paths are available"
-    )
+    missing_documents: List[str] = Field(default_factory=list)
+    mandatory_met: bool = False
+    special_category_eligible: bool = False
+    has_alternative_path: bool = False
 
 class ActionItem(BaseModel):
     task: str
-    priority: str = "Medium"  # "High", "Medium", "Low"
+    priority: str = "Medium"
     deadline: Optional[str] = None
 
 class ActionPlan(BaseModel):
@@ -85,7 +58,6 @@ class ActionPlan(BaseModel):
     timeline: Dict[str, str] = Field(default_factory=dict)
 
 class AnalysisResponse(BaseModel):
-    """Complete response from the agent system"""
     analysis: DocumentAnalysis
     eligibility: EligibilityResult
     action_plan: ActionPlan
