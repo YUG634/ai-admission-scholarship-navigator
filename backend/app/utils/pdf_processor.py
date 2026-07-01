@@ -119,12 +119,6 @@ except ImportError:
     pdfplumber = None
     logger.warning("pdfplumber not installed. Install with: pip install pdfplumber")
 
-try:
-    import pandas as pd
-except ImportError:
-    pd = None
-    logger.warning("pandas not installed. Install with: pip install pandas")
-
 
 # ============================================================
 # PDF VALIDATION FUNCTIONS
@@ -464,36 +458,6 @@ def extract_tables_from_text(text: str) -> List[List[List[str]]]:
     return tables
 
 
-def extract_text_with_ocr(pdf_bytes: bytes) -> str:
-    """
-    Extract text from scanned PDFs using OCR (requires additional dependencies)
-    
-    Args:
-        pdf_bytes: PDF file as bytes
-        
-    Returns:
-        Extracted text from OCR
-    """
-    try:
-        from pdf2image import convert_from_bytes
-        import pytesseract
-        
-        images = convert_from_bytes(pdf_bytes)
-        text = ""
-        for image in images:
-            page_text = pytesseract.image_to_string(image)
-            text += page_text + "\n"
-        
-        return clean_pdf_text(text)
-        
-    except ImportError as e:
-        logger.warning(f"OCR dependencies not installed: {e}")
-        return ""
-    except Exception as e:
-        logger.error(f"OCR extraction failed: {e}")
-        return ""
-
-
 # ============================================================
 # EXPORTED FUNCTIONS
 # ============================================================
@@ -507,5 +471,4 @@ __all__ = [
     'extract_text_from_pdf',
     'extract_structured_data',
     'extract_tables_from_text',
-    'extract_text_with_ocr',
 ]
