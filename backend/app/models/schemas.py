@@ -1,9 +1,9 @@
 from pydantic import BaseModel, Field, validator
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Union
 from enum import Enum
 from datetime import datetime
 
-# ✅ ADD THIS
+# ✅ ADD THIS - DocumentType Enum
 class DocumentType(str, Enum):
     SCHOLARSHIP = "scholarship"
     ADMISSION = "admission"
@@ -35,6 +35,24 @@ class DocumentAnalysis(BaseModel):
     alternative_admission_paths: List[str] = Field(default_factory=list)
     required_documents: List[str] = Field(default_factory=list)
     important_instructions: List[str] = Field(default_factory=list)
+    
+    # ✅ ADD VALIDATORS TO HANDLE BAD DATA
+    @validator('scholarship_name', pre=True)
+    def validate_scholarship_name(cls, v):
+        if v is None:
+            return ""
+        if isinstance(v, list):
+            return v[0] if v else ""
+        return str(v)
+    
+    @validator('deadline', pre=True)
+    def validate_deadline(cls, v):
+        if v is None:
+            return ""
+        if isinstance(v, list):
+            # Join list items into a single string
+            return ", ".join(v) if v else ""
+        return str(v)
 
 class EligibilityResult(BaseModel):
     status: str = "Not Eligible"
