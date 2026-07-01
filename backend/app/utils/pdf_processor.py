@@ -1,71 +1,160 @@
-import PyPDF2
-import pdfplumber
-from io import BytesIO
-import re
+import io
+import logging
+from typing import Tuple, Optional
+
+logger = logging.getLogger(__name__)
+
+try:
+    from pypdf import PdfReader
+except ImportError:
+    PdfReader = None
+    logger.warning("pypdf not installed. Install with: pip install pypdf")
+
+try:
+    import pdfplumber
+except ImportError:
+    pdfplumber = None
+    logger.warning("pdfplumber not installed. Install with: pip install pdfplumber")
+
+
+def validate_pdf(pdf_bytes: bytes) -> Tuple[bool, str]:
+    """
+    Validate if the bytes represent a valid PDF
+    
+    Returns:
+        (True, "Valid PDF") if valid
+        (False, "Error message") if invalid
+    """
+    try:
+        # Check PDF signature
+        if not pdf_bytes.startswith(b'%PDF'):
+            return False, "File is not a valid PDF (missing PDF signature)"
+        
+        # Try to read with pypdf first
+        if PdfReader:
+            try:
+                reader = PdfReader(io.BytesIO(pdf_bytes))
+                if len(reader.pages) == 0:
+                    return False, "PDF has no pages"
+                return True, "Valid PDF"
+            except Exception as e:
+                logger.warning(f"pypdf validation failed: {e}")
+        
+        # Fallback to pdfplumber
+        if pdfplumber:
+            try:
+                with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+                    if len(pdf.pages) == 0:
+                        return False, "PDF has no pages"
+                    return True, "Valid PDF"
+            except Exception as e:
+                logger.warning(f"pdfplumber validation failed: {e}")
+        
+        return False, "Could not read PDF file"
+        
+    except Exception as e:
+        return False, f"PDF validation error: {str(e)}"
+
 
 def extract_text_from_pdf(pdf_bytes: bytes) -> str:
-    """Extract text from PDF with better handling of corrupted text"""
+    """
+    Extract text from PDF using multiple fallback methods
     
-    # Method 1: Try pdfplumber (better for complex layouts)
-    try:
-        with pdfplumber.open(BytesIO(pdf_bytes)) as pdf:
-            text = ""
-            for page in pdf.pages:
-                page_text = page.extract_text() or ""
-                # Clean up the text
-                page_text = clean_pdf_text(page_text)
-                text += page_text + "\n"
-            if text.strip():
-                print(f"✅ pdfplumber extracted {len(text)} chars")
-                return text.strip()
-    except Exception as e:
-        print(f"pdfplumber failed: {e}")
-    
-    # Method 2: Fallback to PyPDF2
-    try:
-        pdf_reader = PyPDF2.PdfReader(BytesIO(pdf_bytes))
-        text = ""
-        for page in pdf_reader.pages:
-            page_text = page.extract_text() or ""
-            page_text = clean_pdf_text(page_text)
-            text += page_text + "\n"
-        if text.strip():
-            print(f"✅ PyPDF2 extracted {len(text)} chars")
-            return text.strip()
-    except Exception as e:
-        print(f"PyPDF2 failed: {e}")
-    
-    return ""
-
-def clean_pdf_text(text: str) -> str:
-    """Clean up corrupted PDF text (fix spacing issues)"""
-    # Fix spaced letters: "0 5 t h M a y" → "05th May"
-    text = re.sub(r'(\d)\s+(\d)\s+([a-zA-Z])\s+([a-zA-Z])\s+([a-zA-Z])', r'\1\2\3\4\5', text)
-    text = re.sub(r'([a-zA-Z])\s+([a-zA-Z])\s+([a-zA-Z])\s+([a-zA-Z])', r'\1\2\3\4', text)
-    text = re.sub(r'([a-zA-Z])\s+([a-zA-Z])\s+([a-zA-Z])', r'\1\2\3', text)
-    text = re.sub(r'([a-zA-Z])\s+([a-zA-Z])', r'\1\2', text)
-    
-    # Fix common patterns: "FO R" → "FOR"
-    text = re.sub(r'F O R', 'FOR', text)
-    text = re.sub(r'T H E', 'THE', text)
-    text = re.sub(r'A N D', 'AND', text)
-    
-    # Fix dates: "0 5 t h M a y" → "05th May"
-    text = re.sub(r'(\d)\s+(\d)\s+([a-zA-Z])\s+([a-zA-Z])\s+([a-zA-Z])', r'\1\2\3\4\5', text)
-    
-    # Remove extra spaces
-    text = re.sub(r'\s+', ' ', text)
-    
-    return text
-
-def validate_pdf(pdf_bytes: bytes) -> bool:
-    """Validate if the file is a proper PDF"""
-    try:
-        PyPDF2.PdfReader(BytesIO(pdf_bytes))
-        return True
-    except:
+    Returns:
+        Extracted text as string
+    Raises:
+        ValueError: If text cannot be extracted
+    """
+    # Method 1: PyPDF (fast, handles most PDFs)
+    if PdfReader:
         try:
-            with pdfplumber.open(BytesIO(pdf_bytes)) as pdf:
-                return len(pdf.pages) > 0
+            reader = PdfReader(io.BytesIO(pdf_bytes))
+            text = ""
+            for page in reader.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n"
+            
+            if text and len(text.strip()) > 100:
+                logger.info(f"✅ Extracted {len(text)} chars using pypdf")
+                return text
+            elif text.strip():
+                logger.warning(f"⚠️ pypdf extracted only {len(text)} chars, trying fallback")
+        except Exception as e:
+            logger.warning(f"pypdf extraction failed: {e}")
+    
+    # Method 2: pdfplumber (better for complex/table PDFs)
+    if pdfplumber:
+        try:
+            with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+                text = ""
+                for page in pdf.pages:
+                    page_text = page.extract_text()
+                    if page_text:
+                        text += page_text + "\n"
+                
+                if text and len(text.strip()) > 100:
+                    logger.info(f"✅ Extracted {len(text)} chars using pdfplumber")
+                    return text
+                elif text.strip():
+                    logger.warning(f"⚠️ pdfplumber extracted only {len(text)} chars")
+        except Exception as e:
+            logger.warning(f"pdfplumber extraction failed: {e}")
+    
+    # Method 3: Try both and combine
+    combined_text = ""
+    if PdfReader:
+        try:
+            reader = PdfReader(io.BytesIO(pdf_bytes))
+            for page in reader.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    combined_text += page_text + "\n"
         except:
-            return False
+            pass
+    
+    if pdfplumber and not combined_text.strip():
+        try:
+            with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+                for page in pdf.pages:
+                    page_text = page.extract_text()
+                    if page_text:
+                        combined_text += page_text + "\n"
+        except:
+            pass
+    
+    if combined_text.strip():
+        logger.info(f"✅ Combined extraction: {len(combined_text)} chars")
+        return combined_text
+    
+    # All methods failed
+    raise ValueError(
+        "Could not extract text from PDF. "
+        "The PDF might be scanned, password-protected, or corrupted. "
+        "Try using a text-based PDF file."
+    )
+
+
+def get_pdf_info(pdf_bytes: bytes) -> dict:
+    """
+    Get basic PDF info without extracting all text
+    """
+    info = {
+        "is_valid": False,
+        "page_count": 0,
+        "size_kb": len(pdf_bytes) // 1024
+    }
+    
+    try:
+        if PdfReader:
+            reader = PdfReader(io.BytesIO(pdf_bytes))
+            info["page_count"] = len(reader.pages)
+            info["is_valid"] = True
+        elif pdfplumber:
+            with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+                info["page_count"] = len(pdf.pages)
+                info["is_valid"] = True
+    except Exception as e:
+        logger.warning(f"Could not get PDF info: {e}")
+    
+    return info
