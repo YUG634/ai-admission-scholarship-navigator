@@ -13,16 +13,17 @@ app = FastAPI(
     version="2.0.0"
 )
 
-# ✅ Updated CORS - Add your Netlify URL
-allow_origins = [
+# ✅ Add your Vercel URL to allowed origins
+allowed_origins = [
     "http://localhost:5173",
     "http://localhost:3000",
-    "https://aiadmissionandscholarshipnavigator.netlify.app",  # ✅ ADD THIS
+    "https://ai-admission-scholarship-navigator.vercel.app",  # ✅ ADD THIS
+    "https://ai-admission-scholarship-navigator.netlify.app",  # Keep this if you have
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allow_origins,  # ✅ Updated
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -42,11 +43,7 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    return {
-        "status": "healthy",
-        "framework": "Google ADK",
-        "agents": ["DocumentAnalysis", "Eligibility", "ActionPlan"]
-    }
+    return {"status": "healthy", "framework": "Google ADK", "agents": ["DocumentAnalysis", "Eligibility", "ActionPlan"]}
 
 if __name__ == "__main__":
     import uvicorn
@@ -54,5 +51,5 @@ if __name__ == "__main__":
         "app.main:app",
         host=os.getenv("HOST", "0.0.0.0"),
         port=int(os.getenv("PORT", 8000)),
-        reload=True
+        reload=False
     )
