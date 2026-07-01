@@ -103,3 +103,7 @@ class ADKOrchestrator:
             action_plan=action_plan,
             processing_time_ms=(time.time() - overall_start) * 1000
         )
+    # DEBUG: Print first 2000 chars of PDF text to see what Gemini sees
+print("📄 PDF PREVIEW:")
+print(pdf_text[:2000])
+print("=" * 60)
