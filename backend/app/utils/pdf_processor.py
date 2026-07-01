@@ -3,53 +3,115 @@
 import re
 import io
 import logging
-from typing import List, Dict, Any
+from typing import Tuple, Optional, List
 
 logger = logging.getLogger(__name__)
 
-def extract_tables_from_pdf(pdf_bytes: bytes) -> List[List[List[str]]]:
-    """
-    Extract tables from PDF using pdfplumber
-    """
-    if not pdfplumber:
-        logger.warning("pdfplumber not installed. Tables won't be extracted.")
-        return []
-    
-    try:
-        with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
-            tables = []
-            for page in pdf.pages:
-                page_tables = page.extract_tables()
-                if page_tables:
-                    tables.extend(page_tables)
-            return tables
-    except Exception as e:
-        logger.error(f"Error extracting tables: {e}")
-        return []
+# ============================================================
+# ADD THESE FUNCTIONS (at the top of the file)
+# ============================================================
 
-def extract_pdf_structure(pdf_bytes: bytes) -> Dict[str, Any]:
+def clean_pdf_text(text: str) -> str:
     """
-    Extract structured data from PDF including:
-    - Full text
-    - Tables
-    - Page structure
+    Clean extracted PDF text by removing extra whitespace, fixing line breaks,
+    and normalizing common formatting issues.
     """
-    result = {
-        "text": "",
-        "tables": [],
-        "pages": []
-    }
+    if not text:
+        return ""
     
-    # Extract text
-    try:
-        result["text"] = extract_text_from_pdf(pdf_bytes)
-    except Exception as e:
-        logger.error(f"Text extraction failed: {e}")
+    # Remove excessive whitespace
+    text = re.sub(r'\s+', ' ', text)
     
-    # Extract tables
-    try:
-        result["tables"] = extract_tables_from_pdf(pdf_bytes)
-    except Exception as e:
-        logger.error(f"Table extraction failed: {e}")
+    # Fix common PDF extraction artifacts
+    text = re.sub(r'(\w)-\s+(\w)', r'\1\2', text)  # Fix hyphenated words
+    text = re.sub(r'(\w)\s+-\s+(\w)', r'\1-\2', text)  # Fix spaced hyphens
     
-    return result
+    # Remove special characters that often appear in PDFs
+    text = re.sub(r'[^\x00-\x7F]+', ' ', text)  # Remove non-ASCII characters
+    
+    # Normalize bullet points
+    text = re.sub(r'[•·●○◆◇▪▫]', '•', text)
+    
+    # Clean up multiple spaces
+    text = re.sub(r' +', ' ', text)
+    
+    return text.strip()
+
+
+def normalize_space(text: str) -> str:
+    """
+    Normalize whitespace in text - collapse multiple spaces, remove leading/trailing spaces.
+    """
+    if not text:
+        return ""
+    
+    # Collapse multiple spaces into single space
+    text = re.sub(r' +', ' ', text)
+    
+    # Remove leading/trailing whitespace
+    text = text.strip()
+    
+    # Normalize newlines - keep single newlines but collapse multiple
+    text = re.sub(r'\n\s*\n', '\n\n', text)
+    
+    return text
+
+
+def chunk_text(text: str, chunk_size: int = 2000) -> List[str]:
+    """
+    Split text into chunks for processing by AI models.
+    """
+    if not text:
+        return []
+    
+    chunks = []
+    words = text.split()
+    current_chunk = []
+    current_length = 0
+    
+    for word in words:
+        if current_length + len(word) + 1 > chunk_size:
+            chunks.append(' '.join(current_chunk))
+            current_chunk = [word]
+            current_length = len(word)
+        else:
+            current_chunk.append(word)
+            current_length += len(word) + 1
+    
+    if current_chunk:
+        chunks.append(' '.join(current_chunk))
+    
+    return chunks
+
+
+# ============================================================
+# YOUR EXISTING FUNCTIONS (keep these)
+# ============================================================
+
+try:
+    from pypdf import PdfReader
+except ImportError:
+    PdfReader = None
+    logger.warning("pypdf not installed. Install with: pip install pypdf")
+
+try:
+    import pdfplumber
+except ImportError:
+    pdfplumber = None
+    logger.warning("pdfplumber not installed. Install with: pip install pdfplumber")
+
+
+def validate_pdf(pdf_bytes: bytes) -> Tuple[bool, str]:
+    # ... your existing code ...
+    pass
+
+
+def extract_text_from_pdf(pdf_bytes: bytes) -> str:
+    # ... your existing code ...
+    # Make sure to call clean_pdf_text on the extracted text
+    pass
+
+
+def get_pdf_info(pdf_bytes: bytes) -> dict:
+    # ... your existing code ...
+    pass
