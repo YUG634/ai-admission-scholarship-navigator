@@ -1,6 +1,9 @@
+# backend/app/utils/pdf_processor.py
+
 import io
 import logging
-from typing import Tuple, Optional
+import re
+from typing import Tuple, Optional, List
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +19,106 @@ except ImportError:
     pdfplumber = None
     logger.warning("pdfplumber not installed. Install with: pip install pdfplumber")
 
+
+# ============================================================
+# ADD THESE FUNCTIONS (NEW)
+# ============================================================
+
+def clean_pdf_text(text: str) -> str:
+    """
+    Clean extracted PDF text by removing extra whitespace, fixing line breaks,
+    and normalizing common formatting issues.
+    
+    Args:
+        text: Raw text extracted from PDF
+        
+    Returns:
+        Cleaned text
+    """
+    if not text:
+        return ""
+    
+    # Remove excessive whitespace
+    text = re.sub(r'\s+', ' ', text)
+    
+    # Fix common PDF extraction artifacts
+    text = re.sub(r'(\w)-\s+(\w)', r'\1\2', text)  # Fix hyphenated words
+    text = re.sub(r'(\w)\s+-\s+(\w)', r'\1-\2', text)  # Fix spaced hyphens
+    
+    # Remove special characters that often appear in PDFs
+    text = re.sub(r'[^\x00-\x7F]+', ' ', text)  # Remove non-ASCII characters
+    
+    # Normalize bullet points
+    text = re.sub(r'[•·●○◆◇▪▫]', '•', text)
+    
+    # Clean up multiple spaces
+    text = re.sub(r' +', ' ', text)
+    
+    return text.strip()
+
+
+def normalize_space(text: str) -> str:
+    """
+    Normalize whitespace in text - collapse multiple spaces, remove leading/trailing spaces.
+    
+    Args:
+        text: Text to normalize
+        
+    Returns:
+        Normalized text
+    """
+    if not text:
+        return ""
+    
+    # Collapse multiple spaces into single space
+    text = re.sub(r' +', ' ', text)
+    
+    # Remove leading/trailing whitespace
+    text = text.strip()
+    
+    # Normalize newlines - keep single newlines but collapse multiple
+    text = re.sub(r'\n\s*\n', '\n\n', text)
+    
+    return text
+
+
+def chunk_text(text: str, chunk_size: int = 2000) -> List[str]:
+    """
+    Split text into chunks for processing by AI models.
+    
+    Args:
+        text: Text to chunk
+        chunk_size: Maximum size of each chunk
+        
+    Returns:
+        List of text chunks
+    """
+    if not text:
+        return []
+    
+    chunks = []
+    words = text.split()
+    current_chunk = []
+    current_length = 0
+    
+    for word in words:
+        if current_length + len(word) + 1 > chunk_size:
+            chunks.append(' '.join(current_chunk))
+            current_chunk = [word]
+            current_length = len(word)
+        else:
+            current_chunk.append(word)
+            current_length += len(word) + 1
+    
+    if current_chunk:
+        chunks.append(' '.join(current_chunk))
+    
+    return chunks
+
+
+# ============================================================
+# EXISTING FUNCTIONS (keep these)
+# ============================================================
 
 def validate_pdf(pdf_bytes: bytes) -> Tuple[bool, str]:
     """
@@ -77,7 +180,9 @@ def extract_text_from_pdf(pdf_bytes: bytes) -> str:
             
             if text and len(text.strip()) > 100:
                 logger.info(f"✅ Extracted {len(text)} chars using pypdf")
-                return text
+                # Clean the extracted text
+                cleaned_text = clean_pdf_text(text)
+                return cleaned_text
             elif text.strip():
                 logger.warning(f"⚠️ pypdf extracted only {len(text)} chars, trying fallback")
         except Exception as e:
@@ -95,7 +200,8 @@ def extract_text_from_pdf(pdf_bytes: bytes) -> str:
                 
                 if text and len(text.strip()) > 100:
                     logger.info(f"✅ Extracted {len(text)} chars using pdfplumber")
-                    return text
+                    cleaned_text = clean_pdf_text(text)
+                    return cleaned_text
                 elif text.strip():
                     logger.warning(f"⚠️ pdfplumber extracted only {len(text)} chars")
         except Exception as e:
@@ -125,7 +231,8 @@ def extract_text_from_pdf(pdf_bytes: bytes) -> str:
     
     if combined_text.strip():
         logger.info(f"✅ Combined extraction: {len(combined_text)} chars")
-        return combined_text
+        cleaned_text = clean_pdf_text(combined_text)
+        return cleaned_text
     
     # All methods failed
     raise ValueError(
