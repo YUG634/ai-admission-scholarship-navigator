@@ -1,109 +1,114 @@
+from typing import List, Optional
+import re
+
 from google.adk.agents import Agent
 from google.adk.tools import FunctionTool
+
 from app.services.gemini_service import GeminiService
-import json
-import re
+from app.utils.pdf_processor import clean_pdf_text, normalize_space
+
+def extract_required_documents_from_text(pdf_text: str) -> List[str]:
+    """Extract documents from PDF text - simplified robust version"""
+    documents = []
+    
+    # Clean the text first
+    cleaned = clean_pdf_text(pdf_text)
+    
+    # Try to find PART-G section
+    start_markers = [
+        r"PART[- ]G",
+        r"LIST OF REQUIRED DOCUMENTS",
+        r"Documents Required",
+    ]
+    
+    section_start = None
+    for marker in start_markers:
+        match = re.search(marker, cleaned, re.IGNORECASE)
+        if match:
+            section_start = match.start()
+            break
+    
+    if section_start is None:
+        return []
+    
+    # Get text after the marker
+    section_text = cleaned[section_start:section_start + 3000]
+    
+    # Find checkbox items
+    patterns = [
+        r'☐\s*(\d+\.\s*)?([^\n]+)',
+        r'(\d+\.\s*)([^\n]+)',
+    ]
+    
+    for pattern in patterns:
+        matches = re.findall(pattern, section_text)
+        for match in matches:
+            doc_name = match[-1].strip()
+            doc_name = re.sub(r'^\d+\.\s*', '', doc_name)
+            doc_name = re.sub(r'\s+', ' ', doc_name)
+            doc_name = doc_name.strip()
+            
+            if doc_name and len(doc_name) > 3:
+                garbage = ['candid', 'inform', 'bachelorofperform', 'schoolofperform', 
+                          'closingdates', 'meritlist', 'paymentoffees', 'amonwards']
+                if not any(g in doc_name.lower() for g in garbage):
+                    if doc_name not in documents:
+                        documents.append(doc_name)
+    
+    # If still no documents, try line-by-line
+    if not documents:
+        lines = section_text.split('\n')
+        for line in lines:
+            line = line.strip()
+            if len(line) > 5 and len(line) < 50:
+                if any(c in line for c in ['☐', '•', '-', '▪']):
+                    doc = re.sub(r'[☐•\-▪]\s*', '', line)
+                    doc = doc.strip()
+                    if doc and len(doc) > 3:
+                        documents.append(doc)
+    
+    return documents
+
 
 class ADKDocumentAgent:
     def __init__(self):
         self.gemini = GeminiService()
         self.agent = self._create_agent()
         self.tool_func = self.agent.tools[0].func
-    
+
     def _create_agent(self):
         def extract_scholarship_info(text: str) -> dict:
-            # ✅ First, try to extract documents using regex (no API call)
-            documents = self._extract_documents_from_text(text)
-            
-            # ✅ Build prompt with document extraction emphasis
+            # Extract documents using regex
+            documents = extract_required_documents_from_text(text)
+
             prompt = f"""
-            You are a document extractor. Extract ALL information from this document.
+Extract from this document. Return ONLY valid JSON.
 
-            Document text:
-            {text[:8000]}
+Document text:
+{text[:6000]}
 
-            CRITICAL RULES FOR DOCUMENTS:
-            1. Look for "LIST OF REQUIRED DOCUMENTS", "Documents Required", "Checklist"
-            2. Extract EACH document as a SEPARATE string
-            3. Example: If you see "☐ 1. 10th Marksheet", return "10th Marksheet"
-            4. DO NOT summarize. DO NOT combine. Return each document individually.
-            5. If you find documents in the text, include them ALL.
+Return format:
+{{
+    "document_type": "admission",
+    "scholarship_name": "Program name from document header",
+    "deadline": "Deadline from document",
+    "mandatory_requirements": ["List of requirements"],
+    "special_categories": ["List of special categories"],
+    "alternative_admission_paths": ["List of alternative paths"],
+    "important_instructions": ["List of instructions"]
+}}
+"""
 
-            Return ONLY valid JSON:
-            {{
-                "document_type": "admission",
-                "scholarship_name": "Name from document",
-                "deadline": "Deadline from document",
-                "mandatory_requirements": [
-                    "Each requirement as separate string"
-                ],
-                "special_categories": [
-                    "Each category as separate string"
-                ],
-                "alternative_admission_paths": [
-                    "Each path as separate string"
-                ],
-                "required_documents": [
-                    "Document 1",
-                    "Document 2",
-                    "Document 3"
-                ],
-                "important_instructions": [
-                    "Instruction 1",
-                    "Instruction 2"
-                ]
-            }}
-            """
-            
             result = self.gemini.generate_structured_response(prompt)
-            
-            # ✅ If Gemini didn't extract documents, use regex extraction as fallback
-            if not result.get("required_documents") or len(result.get("required_documents", [])) < 2:
-                result["required_documents"] = documents
-            
+            if not isinstance(result, dict):
+                result = {}
+
+            result["required_documents"] = documents
             return result
-        
+
         return Agent(
             name="DocumentAnalysisAgent",
             model="gemini-2.5-flash",
-            instruction="""Extract ALL documents individually. NEVER summarize. Each document must be a separate string.""",
-            tools=[FunctionTool(extract_scholarship_info)]
+            instruction="Extract information from documents. Never generate required_documents.",
+            tools=[FunctionTool(extract_scholarship_info)],
         )
-    
-    def _extract_documents_from_text(self, text: str) -> list:
-        """Extract documents using regex - reliable fallback"""
-        documents = []
-        
-        # Look for document list section
-        patterns = [
-            r'(?:LIST OF REQUIRED DOCUMENTS|Documents Required|Checklist|Enclosures)[\s:]*([^\n]*(?:\n[^\n]+)*?)(?:\n\n|\Z)',
-            r'(?:Required Documents|Documents to be attached)[\s:]*([^\n]*(?:\n[^\n]+)*?)(?:\n\n|\Z)',
-        ]
-        
-        for pattern in patterns:
-            match = re.search(pattern, text, re.IGNORECASE | re.DOTALL)
-            if match:
-                section = match.group(1)
-                # Extract numbered or bulleted items
-                items = re.findall(r'(?:☐|•|-|\*|\d+[\.\)])\s*([^\n]+)', section)
-                if items:
-                    documents = [doc.strip() for doc in items if len(doc.strip()) > 5]
-                    break
-        
-        # If no structured list found, look for document-like patterns
-        if not documents:
-            doc_patterns = [
-                r'(\d+[\.\)]\s*)?([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\s*(?:Marksheet|Certificate|Card|Copy|Form|Letter|ID|Proof))',
-                r'([A-Z][a-z]+\s+[A-Z][a-z]+\s+(?:Certificate|Card|Marksheet))',
-            ]
-            for pattern in doc_patterns:
-                matches = re.findall(pattern, text, re.IGNORECASE)
-                for match in matches:
-                    doc_name = match[-1] if isinstance(match, tuple) else match
-                    if doc_name.strip() and len(doc_name.strip()) > 5:
-                        documents.append(doc_name.strip())
-                if documents:
-                    break
-        
-        # Return unique documents
-        return list(dict.fromkeys(documents))
