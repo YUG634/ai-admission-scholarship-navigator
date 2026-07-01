@@ -277,9 +277,9 @@ npm run dev
 
 ### Access the Application
 
-- **Frontend**: http://localhost:5173
-- **Backend API**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs
+- **Frontend**: https://ai-admission-scholarship-navigator.vercel.app/
+- **Backend API**: https://ai-admission-scholarship-navigator.onrender.com
+- **API Documentation**: https://ai-admission-scholarship-navigator.onrender.com/docs
 
 ---
 
